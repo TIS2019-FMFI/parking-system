@@ -20,7 +20,7 @@ class AbstractDatabase(ABC):
 
     @abstractmethod
     def createRecord(self, record):
-        # insertne do DB a hned danemu recordu nastavi ID
+        # insertne do DB a vrati ID daneho recordu
         raise NotImplementedError
 
     @abstractmethod
@@ -44,6 +44,7 @@ class Database(AbstractDatabase):
     def __init__(self, name):
         self.connection = sqlite3.connect(name)
         self.cursor = self.connection.cursor()
+        
 
     def execute(self, query, parameters=None):
         if(parameters is None):
@@ -51,39 +52,57 @@ class Database(AbstractDatabase):
         else:
             self.cursor.execute(query, parameters)
 
+        self.commit()
+            
+
     def commit(self):
         self.connection.commit()
+        
 
     def fetchone(self):
         return self.cursor.fetchone()
+    
 
     def fetchall(self):
         return self.cursor.fetchall()
+    
 
     def parameterFromRecord(self, r):
-        # ECV, arrivalTime, departureTime, companyId, phptoFileName, status
-        return (r.ECV, r.arrivalTime, r.departureTime, r.companyId, r.photoFileName, r.status)
+        # ECV, arrivalTime, departureTime, companyId, boxID, phptoFileName, status
+        return (r.ECV, r.arrivalTime, r.departureTime, r.companyId, r.boxId, r.photoFileName, r.status)
+
 
     @overrides(AbstractDatabase)
     def createRecord(self, record):
-        par = self.parameterFromRecord()
-        self.execute("INSERT INTO records VALUES (?,?,?,?,?,?)", par)
+        par = self.parameterFromRecord(record)
+        self.execute("INSERT INTO records(ecv, arrivalTime, departureTime, companyId, boxId," +
+                     "photoFileName, status) VALUES (?,?,?,?,?,?,?)", par)
+        
+        return self.cursor.lastrowid    # vrati recordId
+
 
     @overrides(AbstractDatabase)
-    def updateRecord(self, r):
-        par = self.parameterFromRecord() + (r.id, )
-        self.execute('''UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?,
-                        photoFileName = ?, status = ? WHERE id = ?''', par)
+    def updateRecord(self, record):
+        par = self.parameterFromRecord(record) + (record.recordDd, )
+        self.execute("UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?," +
+                     "photoFileName = ?, status = ? WHERE recordId = ?", par)
+
 
     @overrides(AbstractDatabase)
     def createCompany(self, companyName):
-        self.execute("INSERT INTO companies VALUES (?)", (companyName))
+        self.execute("INSERT INTO companies VALUES (?)", (companyName, ))
+
 
     @overrides(AbstractDatabase)
-    def updateCompany(self, companyID, newCompanyName):
-        par = (companyID, newCompanyName)
+    def updateCompany(self, companyId, newCompanyName):
+        par = (companyId, newCompanyName)
         self.execute("UPDATE campanies SET name = ? WHERE id = ?")
 
+
     @overrides(AbstractDatabase)
-    def deleteCompany(self, companyID):
-        self.execute("DELETE FROM companies WHERE id = ?", (companyID))
+    def deleteCompany(self, companyId):
+        self.execute("DELETE FROM companies WHERE id = ?", (companyId, ))
+
+
+
+        
