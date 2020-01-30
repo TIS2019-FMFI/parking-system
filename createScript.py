@@ -12,13 +12,17 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS companies
                   (companyID INTEGER PRIMARY KEY AUTOINCREMENT,
                    name TEXT)''')
 
+# Insert firiem, ktore uz existuje podla ID v configu
+# DOROBIT !!!
+
 # Table for records
 cursor.execute('''CREATE TABLE IF NOT EXISTS records
-                  (recordID INTEGER PRIMARY KEY AUTOINCREMENT,
+                  (recordId INTEGER PRIMARY KEY AUTOINCREMENT,
                    ecv TEXT,
                    arrivalTime DATETIME DEFAULT CURRENT_TIMESTAMP,
                    departureTime DATETIME,
                    companyId INTEGER,
+                   boxId INTEGER,
                    photoFileName TEXT,
                    status TEXT,
                    FOREIGN KEY (companyID) REFERENCES companies(companyID))''')
