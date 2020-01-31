@@ -28,7 +28,7 @@ class Box:
     def newParking(self, ECV, borrowed, companyId):
         if self.record is None:
             # Vytvori zaznam a ulozi ho do databazy
-            self.record = self.createRecord(ECV, borrowed, companyId, self)
+            self.record = self.createRecord(ECV, borrowed, companyId, self.boxId, self.companyId)
             self.record.save()
             self.changeColor()
             
@@ -66,12 +66,11 @@ class Box:
         
 
     #vytvor instanciu záznamu a vrat ju
-    def createRecord(self, ECV, borrowed, companyId, box):
+    def createRecord(self, ECV, borrowed, companyId, boxId, boxCompanyID):
         print('Vytvaram parkovaci zaznam pre Box c.{0}'.format(self.boxId))
-        return Record(ECV, borrowed, companyId, box)
+        return Record(ECV, borrowed, companyId, boxId, boxCompanyID)
 
 
     # DOKONCIT !!!
     def endRecord(self):
-        pass
-        #zrus instanciu záznamu
+        self.record.update()

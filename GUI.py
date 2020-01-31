@@ -4,6 +4,7 @@ from tkinter import ttk
 import os
 from BOX import Box
 from Statistics import Statistics
+import datetime
 
 ##docasna funkcia len
 def find(arr, key):
@@ -99,136 +100,276 @@ class FrameCarPark:
             self.boxes.append(box)
                         
         
-class FrameStatistics:
-    def __init__(self, nb, sizePerc):
-        self.frame = tk.Frame(nb)
-        nb.add(self.frame, text="Štatistika")
-
-        self.canvas = Canvas(self.frame,  width=sizePerc[0], height=sizePerc[1])
-        self.canvas.pack(anchor='c', pady=30)
-        self.canvas.pack_propagate(0)
-
-        fr1 = tk.Frame(self.canvas)
-        fr1.pack(pady=5)
-        ecvSucetCasu = tk.IntVar()
-        ecvPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr1, text='súčet času', var = ecvSucetCasu)
-        ecvPocetZaznamov = tk.IntVar()
-        ecvPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr1, text='počet záznamov', var = ecvPocetZaznamov)
-        ecv = [ecvSucetCasu, ecvPocetZaznamov]
-
-        def checkEcv():
-            for i in ecv:
-                i.set(1)
-
-        ecvPorusujuceParkovani = ttk.Checkbutton(fr1, text='EČV porušujúce parkovanie', command = checkEcv)
-        ecvPorusujuceParkovani.pack(anchor='w')
-        ecvPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
-        ecvPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
-
-        fr2 = tk.Frame(self.canvas)
-        fr2.pack(pady=10)
-        firmySucetCasu = tk.IntVar()
-        firmyPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr2, text='súčet času', var = firmySucetCasu)
-        firmyPocetZaznomov = tk.IntVar()
-        firmyPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr2, text='počet záznamov', var = firmyPocetZaznomov)
-        firmy = [firmySucetCasu, firmyPocetZaznomov]
-        def checkFirmy():
-            for i in firmy:
-                i.set(1)
-        firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = checkFirmy)
-        firmyPorusujuceParkovani.pack(anchor='w')
-        firmyPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
-        firmyPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
-
-        fr3 = tk.Frame(self.canvas)
-        fr3.pack(pady=10)
-        obsadenostKazdyBox = tk.IntVar()
-        obsadenostBoxovKazdyBox = ttk.Checkbutton(fr3, text = 'každý box', var = obsadenostKazdyBox)
-        
-        frameTime = tk.Frame(fr3)
-        obsadenostBoxCas = tk.IntVar()
-        obsadenostBoxovKazdyBoxVCase = ttk.Checkbutton(frameTime, text = 'každý box v čase ', var = obsadenostBoxCas)
-        fromDay = ttk.Combobox(frameTime, values = [i for i in range(1,32)], width = 3)
-        labelBodka1 = ttk.Label(frameTime, text = '. ')
-        fromMonth = ttk.Combobox(frameTime, values = [i for i in range(1,13)], width = 3)
-        labelBodka2 = ttk.Label(frameTime, text = '. ')
-        fromYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 3)
-        fromHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
-        labelDvojbodka1 = tk.Label(frameTime, text = ' : ')
-        fromMinute = ttk.Combobox(frameTime, values = [i for i in range(00,60)], width = 3)
-        labelPomlcka = tk.Label(frameTime, text = ' - ')
-        toDay = ttk.Combobox(frameTime, values = [i for i in range(1,32)], width = 3)
-        labelBodka3 = ttk.Label(frameTime, text = '. ')
-        toMonth = ttk.Combobox(frameTime, values = [i for i in range(1,13)], width = 3)
-        labelBodka4 = ttk.Label(frameTime, text = '. ')
-        toYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 3)
-        toHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
-        labelDvojbodka2 = tk.Label(frameTime, text = ' : ')
-        toMinute = ttk.Combobox(frameTime, values = [i for i in range(00,60)], width = 3)
-        obsadenost = [obsadenostBoxCas, obsadenostKazdyBox]
-
-        def checkObsadenost():
-            for i in obsadenost:
-                i.set(1)
-        
-        obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command= checkObsadenost)
-        obsadenostBoxov.pack(anchor='w')
-        obsadenostBoxovKazdyBox.pack(padx=20, anchor='w')
-        frameTime.pack(padx=20, anchor='w')
-        obsadenostBoxovKazdyBoxVCase.pack(side = 'left')
-        fromDay.pack(side = 'left')        
-        fromDay.pack_propagate(0)
-        labelBodka1.pack(side = 'left')
-        fromMonth.pack(side = 'left')        
-        fromMonth.pack_propagate(0)
-        labelBodka2.pack(side = 'left')
-        fromYear.pack(side = 'left')        
-        fromYear.pack_propagate(0)
-        fromHour.pack(side = 'left')        
-        fromHour.pack_propagate(0)
-        labelDvojbodka1.pack(side = 'left')
-        fromMinute.pack(side = 'left')
-        fromMinute.pack_propagate(0)
-        labelPomlcka.pack(side = 'left')
-        toDay.pack(side = 'left')        
-        toDay.pack_propagate(0)
-        labelBodka3.pack(side = 'left')
-        toMonth.pack(side = 'left')        
-        toMonth.pack_propagate(0)
-        labelBodka4.pack(side = 'left')
-        toYear.pack(side = 'left')        
-        toYear.pack_propagate(0)
-        toHour.pack(side = 'left')
-        toHour.pack_propagate(0)
-        labelDvojbodka2.pack(side = 'left')
-        toMinute.pack(side = 'left')
-        toMinute.pack_propagate(0)
-
-        fr4 = tk.Frame(self.canvas)
-        fr4.pack(pady=10)
-        ZTPKazdyBox = tk.IntVar()
-        vyuzivaniemiestaPreZtpKazdyBox = ttk.Checkbutton(fr4, text = 'každý box', var = ZTPKazdyBox)
-        ZTPFirmy = tk.IntVar()
-        vyuzivaniemiestaPreZtpPodlaFiriem = ttk.Checkbutton(fr4, text = 'podľa firiem', var = ZTPFirmy)
-        ztp = [ZTPKazdyBox, ZTPFirmy]
-        
-        def checkZTP():
-            for i in ztp:
-                i.set(1)
-                
-        vyuzivaniemiestaPreZtp = ttk.Checkbutton(fr4, text = 'Využívanie miesta pre ZŤP', command = checkZTP)
-        vyuzivaniemiestaPreZtp.pack(anchor='w')
-        vyuzivaniemiestaPreZtpKazdyBox.pack(padx=20, anchor='w')
-        vyuzivaniemiestaPreZtpPodlaFiriem.pack(padx=20, anchor='w')
-        
-
-        buttonGenerate = ttk.Button(self.canvas, text='Vygeneruj',
-                                    command = lambda: Statistics(ecvSucetCasu, ecvPocetZaznamov,
-                                                                 firmySucetCasu, firmyPocetZaznomov,
-                                                                 obsadenostBoxCas, obsadenostKazdyBox,
-                                                                 ZTPKazdyBox, ZTPFirmy,
-                                                                 datetime.datetime(int(fromYear.get()), int(fromMonth.get()), int(fromDay.get()), int(fromHour.get()), int(fromMinute.get())),
-                                                                 datetime.datetime(int(toYear.get()), int(toMonth.get()), int(toDay.get()), int(toHour.get()), int(toMinute.get()))))
+class FrameStatistics:
+
+    def __init__(self, nb, sizePerc):
+
+        self.frame = tk.Frame(nb)
+
+        nb.add(self.frame, text="Štatistika")
+
+
+
+        self.canvas = Canvas(self.frame,  width=sizePerc[0], height=sizePerc[1])
+
+        self.canvas.pack(anchor='c', pady=30)
+
+        self.canvas.pack_propagate(0)
+
+
+
+        fr1 = tk.Frame(self.canvas)
+
+        fr1.pack(pady=5)
+
+        ecvSucetCasu = tk.IntVar()
+
+        ecvPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr1, text='súčet času', var = ecvSucetCasu)
+
+        ecvPocetZaznamov = tk.IntVar()
+
+        ecvPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr1, text='počet záznamov', var = ecvPocetZaznamov)
+
+        ecv = [ecvSucetCasu, ecvPocetZaznamov]
+
+
+
+        def checkEcv():
+
+            for i in ecv:
+
+                i.set(1)
+
+
+
+        ecvPorusujuceParkovani = ttk.Checkbutton(fr1, text='EČV porušujúce parkovanie', command = checkEcv)
+
+        ecvPorusujuceParkovani.pack(anchor='w')
+
+        ecvPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
+
+        ecvPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
+
+
+
+        fr2 = tk.Frame(self.canvas)
+
+        fr2.pack(pady=10)
+
+        firmySucetCasu = tk.IntVar()
+
+        firmyPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr2, text='súčet času', var = firmySucetCasu)
+
+        firmyPocetZaznomov = tk.IntVar()
+
+        firmyPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr2, text='počet záznamov', var = firmyPocetZaznomov)
+
+        firmy = [firmySucetCasu, firmyPocetZaznomov]
+
+        def checkFirmy():
+
+            for i in firmy:
+
+                i.set(1)
+
+        firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = checkFirmy)
+
+        firmyPorusujuceParkovani.pack(anchor='w')
+
+        firmyPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
+
+        firmyPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
+
+
+
+        fr3 = tk.Frame(self.canvas)
+
+        fr3.pack(pady=10)
+
+        obsadenostKazdyBox = tk.IntVar()
+
+        obsadenostBoxovKazdyBox = ttk.Checkbutton(fr3, text = 'každý box', var = obsadenostKazdyBox)
+
+        
+
+        frameTime = tk.Frame(fr3)
+
+        obsadenostBoxCas = tk.IntVar()
+
+        obsadenostBoxovKazdyBoxVCase = ttk.Checkbutton(frameTime, text = 'každý box v čase ', var = obsadenostBoxCas)
+
+        fromDay = ttk.Combobox(frameTime, values = [i for i in range(1,32)], width = 3)
+        fromDay.current(0)
+
+        labelBodka1 = ttk.Label(frameTime, text = '. ')
+
+        fromMonth = ttk.Combobox(frameTime, values = [i for i in range(1,13)], width = 3)
+        fromMonth.current(0)
+
+        labelBodka2 = ttk.Label(frameTime, text = '. ')
+
+        fromYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 3)
+        fromYear.current(0)
+
+        fromHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
+        fromHour.current(0)
+
+        labelDvojbodka1 = tk.Label(frameTime, text = ' : ')
+
+        fromMinute = ttk.Combobox(frameTime, values = [i for i in range(00,60)], width = 3)
+        fromMinute.current(0)
+
+        labelPomlcka = tk.Label(frameTime, text = ' - ')
+
+        toDay = ttk.Combobox(frameTime, values = [i for i in range(1,32)], width = 3)
+        toDay.current(0)
+
+        labelBodka3 = ttk.Label(frameTime, text = '. ')
+
+        toMonth = ttk.Combobox(frameTime, values = [i for i in range(1,13)], width = 3)
+        toMonth.current(0)
+
+        labelBodka4 = ttk.Label(frameTime, text = '. ')
+
+        toYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 3)
+        toYear.current(0)
+
+        toHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
+        toHour.current(0)
+
+        labelDvojbodka2 = tk.Label(frameTime, text = ' : ')
+
+        toMinute = ttk.Combobox(frameTime, values = [i for i in range(00,60)], width = 3)
+        toMinute.current(0)
+
+        obsadenost = [obsadenostBoxCas, obsadenostKazdyBox]
+
+
+
+        def checkObsadenost():
+
+            for i in obsadenost:
+
+                i.set(1)
+
+        
+
+        obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command= checkObsadenost)
+
+        obsadenostBoxov.pack(anchor='w')
+
+        obsadenostBoxovKazdyBox.pack(padx=20, anchor='w')
+
+        frameTime.pack(padx=20, anchor='w')
+
+        obsadenostBoxovKazdyBoxVCase.pack(side = 'left')
+
+        fromDay.pack(side = 'left')        
+
+        fromDay.pack_propagate(0)
+
+        labelBodka1.pack(side = 'left')
+
+        fromMonth.pack(side = 'left')        
+
+        fromMonth.pack_propagate(0)
+
+        labelBodka2.pack(side = 'left')
+
+        fromYear.pack(side = 'left')        
+
+        fromYear.pack_propagate(0)
+
+        fromHour.pack(side = 'left')        
+
+        fromHour.pack_propagate(0)
+
+        labelDvojbodka1.pack(side = 'left')
+
+        fromMinute.pack(side = 'left')
+
+        fromMinute.pack_propagate(0)
+
+        labelPomlcka.pack(side = 'left')
+
+        toDay.pack(side = 'left')        
+
+        toDay.pack_propagate(0)
+
+        labelBodka3.pack(side = 'left')
+
+        toMonth.pack(side = 'left')        
+
+        toMonth.pack_propagate(0)
+
+        labelBodka4.pack(side = 'left')
+
+        toYear.pack(side = 'left')        
+
+        toYear.pack_propagate(0)
+
+        toHour.pack(side = 'left')
+
+        toHour.pack_propagate(0)
+
+        labelDvojbodka2.pack(side = 'left')
+
+        toMinute.pack(side = 'left')
+
+        toMinute.pack_propagate(0)
+
+
+
+        fr4 = tk.Frame(self.canvas)
+
+        fr4.pack(pady=10)
+
+        ZTPKazdyBox = tk.IntVar()
+
+        vyuzivaniemiestaPreZtpKazdyBox = ttk.Checkbutton(fr4, text = 'každý box', var = ZTPKazdyBox)
+
+        ZTPFirmy = tk.IntVar()
+
+        vyuzivaniemiestaPreZtpPodlaFiriem = ttk.Checkbutton(fr4, text = 'podľa firiem', var = ZTPFirmy)
+
+        ztp = [ZTPKazdyBox, ZTPFirmy]
+
+        
+
+        def checkZTP():
+
+            for i in ztp:
+
+                i.set(1)
+
+                
+
+        vyuzivaniemiestaPreZtp = ttk.Checkbutton(fr4, text = 'Využívanie miesta pre ZŤP', command = checkZTP)
+
+        vyuzivaniemiestaPreZtp.pack(anchor='w')
+
+        vyuzivaniemiestaPreZtpKazdyBox.pack(padx=20, anchor='w')
+
+        vyuzivaniemiestaPreZtpPodlaFiriem.pack(padx=20, anchor='w')
+
+        
+
+
+
+        buttonGenerate = ttk.Button(self.canvas, text='Vygeneruj',
+
+                                    command = lambda: Statistics(ecvSucetCasu, ecvPocetZaznamov,
+
+                                                                 firmySucetCasu, firmyPocetZaznomov,
+
+                                                                 obsadenostBoxCas, obsadenostKazdyBox,
+
+                                                                 ZTPKazdyBox, ZTPFirmy,
+
+                                                                 datetime.datetime(int(fromYear.get()), int(fromMonth.get()), int(fromDay.get()), int(fromHour.get()), int(fromMinute.get())),
+
+                                                                 datetime.datetime(int(toYear.get()), int(toMonth.get()), int(toDay.get()), int(toHour.get()), int(toMinute.get()))))
+
         buttonGenerate.pack()
         
 class FrameLessees:
@@ -345,7 +486,7 @@ class BoxWindow:
         buttonNahratFotku = tk.Button(self.canvas, text = 'Nahrať fotku', command= lambda: box.addPhoto())
         buttonNahratFotku.grid(row = 5, column = 0, columnspan = 2, pady = 20)
 
-        buttonUkoncitParkovanie = tk.Button(self.canvas, text = 'Ukončiť parkovanie')
+        buttonUkoncitParkovanie = tk.Button(self.canvas, text = 'Ukončiť parkovanie', command = lambda: [box.endParking(),self.win.destroy()])
         buttonUkoncitParkovanie.grid(row = 6, column = 0, columnspan = 2, pady = 20)
         
 class NewBoxWindow:
@@ -408,6 +549,7 @@ class MainWindow:
 
         self.app.mainloop()
 
+
     def addNotification(self, text):
         self.carPark.addNotification(text)
         
@@ -426,8 +568,10 @@ class MarekWindow():
         self.carPark = FrameCarPark(self.nb, getSizeForPercent(self.app, 90), self.app, self)
         self.statistics = FrameStatistics(self.nb, getSizeForPercent(self.app, 60))
         self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))
+       
 
         self.app.mainloop()
+
 
     def addNotification(self, text):
         self.carPark.addNotification(text)
