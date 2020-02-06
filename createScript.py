@@ -1,4 +1,5 @@
 import sqlite3
+from Database import Database
 
 connection = sqlite3.connect("kvant.db")
 cursor = connection.cursor()
@@ -27,12 +28,13 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS records
                    status TEXT,
                    FOREIGN KEY (companyID) REFERENCES companies(companyID))''')
 
-# Table for notifications
-cursor.execute('''CREATE TABLE IF NOT EXISTS notifications
-                  (notificationId INTEGER PRIMARY KEY AUTOINCREMENT,
-                   name TEXT)''')
-
 print("Tables created")
+
+def fill_data(data):
+    db=Database("kvant.db")
+    for i in data:
+        db.createCompany(i)
+fill_data(['Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo'])
 # Save (commit) the changes
 connection.commit()
 
