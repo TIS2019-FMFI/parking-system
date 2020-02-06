@@ -38,6 +38,14 @@ class AbstractDatabase(ABC):
     @abstractmethod
     def deleteCompany(self, companyID):
         raise NotImplementedError
+
+    @abstractmethod    
+    def createNotification(self, companyID):
+        raise NotImplementedError
+
+    @abstractmethod
+    def deleteNotification(self, companyID):
+        raise NotImplementedError
         
     
 class Database(AbstractDatabase):
@@ -112,9 +120,24 @@ class Database(AbstractDatabase):
     def selectAllCompanies(self):
         self.execute("SELECT * FROM companies")
         return self.fetchall()
+    
+    @overrides(AbstractDatabase)
+    def createNotification(self, text):
+        self.execute("INSERT INTO notifications(name) VALUES (?)", (text, ))
+
+    @overrides(AbstractDatabase)
+    def deleteNotification(self, notificationId):
+        self.execute("DELETE FROM notifications WHERE notificationId = ?", (notificationId, ))
+
+    def selectAllNotifications(self):
+        self.execute("SELECT * FROM notifications")
+        return self.fetchall()
+
+    
     def getCompanyNameById(self,id):
         self.execute("SELECT name FROM companies where companyID=?",[id])
         return self.fetchone()[0]
+    
     def getCompanyNameByName(self,id):
         print(id)
         self.execute("SELECT companyID FROM companies where name=?",[id])
