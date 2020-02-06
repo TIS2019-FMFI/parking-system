@@ -27,6 +27,11 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS records
                    status TEXT,
                    FOREIGN KEY (companyID) REFERENCES companies(companyID))''')
 
+# Table for notifications
+cursor.execute('''CREATE TABLE IF NOT EXISTS notifications
+                  (notificationId INTEGER PRIMARY KEY AUTOINCREMENT,
+                   name TEXT)''')
+
 print("Tables created")
 # Save (commit) the changes
 connection.commit()
