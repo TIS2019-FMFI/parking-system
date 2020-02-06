@@ -83,7 +83,7 @@ class Database(AbstractDatabase):
 
     @overrides(AbstractDatabase)
     def updateRecord(self, record):
-        par = self.parameterFromRecord(record) + (record.recordDd, )
+        par = self.parameterFromRecord(record)
         self.execute("UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?," +
                      "photoFileName = ?, status = ? WHERE recordId = ?", par)
 
@@ -102,6 +102,14 @@ class Database(AbstractDatabase):
     @overrides(AbstractDatabase)
     def deleteCompany(self, companyId):
         self.execute("DELETE FROM companies WHERE id = ?", (companyId, ))
+
+    def selectAllRecords(self):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL")
+        return self.fetchall()
+
+    def selectAllCompanies(self):
+        self.execute("SELECT * FROM companies")
+        return self.fetchall()
 
 
 
