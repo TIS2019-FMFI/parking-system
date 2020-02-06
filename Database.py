@@ -38,6 +38,14 @@ class AbstractDatabase(ABC):
     @abstractmethod
     def deleteCompany(self, companyID):
         raise NotImplementedError
+
+    @abstractmethod
+    def createNotification(self, companyID):
+        raise NotImplementedError
+
+    @abstractmethod
+    def deleteNotification(self, companyID):
+        raise NotImplementedError
         
     
 class Database(AbstractDatabase):
@@ -83,14 +91,14 @@ class Database(AbstractDatabase):
 
     @overrides(AbstractDatabase)
     def updateRecord(self, record):
-        par = self.parameterFromRecord(record) + (record.recordDd, )
+        par = self.parameterFromRecord(record)
         self.execute("UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?," +
                      "photoFileName = ?, status = ? WHERE recordId = ?", par)
 
 
     @overrides(AbstractDatabase)
     def createCompany(self, companyName):
-        self.execute("INSERT INTO companies VALUES (?)", (companyName, ))
+        self.execute("INSERT INTO companies(name) VALUES (?)", (companyName, ))
 
 
     @overrides(AbstractDatabase)
@@ -101,7 +109,27 @@ class Database(AbstractDatabase):
 
     @overrides(AbstractDatabase)
     def deleteCompany(self, companyId):
-        self.execute("DELETE FROM companies WHERE id = ?", (companyId, ))
+        self.execute("DELETE FROM companies WHERE companyId = ?", (companyId, ))
+
+    def selectAllRecords(self):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL")
+        return self.fetchall()
+
+    def selectAllCompanies(self):
+        self.execute("SELECT * FROM companies")
+        return self.fetchall()
+    
+    @overrides(AbstractDatabase)
+    def createNotification(self, text):
+        self.execute("INSERT INTO notifications(name) VALUES (?)", (text, ))
+
+    @overrides(AbstractDatabase)
+    def deleteNotification(self, notificationId):
+        self.execute("DELETE FROM notifications WHERE notificationId = ?", (notificationId, ))
+
+    def selectAllNotifications(self):
+        self.execute("SELECT * FROM notifications")
+        return self.fetchall()
 
 
 
