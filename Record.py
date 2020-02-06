@@ -3,12 +3,12 @@ from Database import Database
 import datetime
 
 class Record:
-    def __init__(self, ECV, borrowed, companyId, box, photoFileName = None):
+    def __init__(self, ECV, borrowed, companyId, boxId, boxCompanyId, photoFileName = None):
         self.recordId = -1 # Nastavi sa pri inserte
         self.ECV = ECV
         self.borrowed = borrowed
         self.companyId = companyId # id firmy, ktorej auto zastavilo
-        self.boxId = box.boxId
+        self.boxId = boxId
         self.status = None
         
         self.arrivalTime = self.getTime()
@@ -16,7 +16,7 @@ class Record:
         
         self.photoFileName = photoFileName
 
-        self.setStatus(box)
+        self.setStatus(boxCompanyId)
 
     def addPhoto(self):
         name = File.choosePhoto()
@@ -25,9 +25,9 @@ class Record:
 
     # Urcute status pre zaznam
     # 3 stavy - 'good', 'borrowed', 'wrong'
-    def setStatus(self, box):
+    def setStatus(self, boxCompanyId):
         status = "good"
-        if(self.companyId != box.companyId):
+        if(self.companyId != boxCompanyId):
             if(self.borrowed):
                 status = "borrowed"
             else:
@@ -66,8 +66,10 @@ class Record:
         return "Record {0} (ECV = {1}, companyId = {2}, boxId = {3})".format(self.recordId, self.ECV, self.companyId, self.boxId)
 
 
-
-
+    #Updatne záznam pri ukončení parkovania
+    def update(self):
+        self.departureTime = self.getTime()
+        Database("kvant.db").updateRecord(self)
 
 
     

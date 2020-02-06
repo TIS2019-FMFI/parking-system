@@ -131,6 +131,14 @@ class Database(AbstractDatabase):
         self.execute("SELECT * FROM notifications")
         return self.fetchall()
 
+    def selectAllRecords(self):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL")
+        return self.fetchall()
+
+    def selectAllCompanies(self):
+        self.execute("SELECT * FROM companies")
+        return self.fetchall()
+
 
 
         

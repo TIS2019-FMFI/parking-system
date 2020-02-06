@@ -6,7 +6,6 @@ from BOX import Box
 from Statistics import Statistics
 import datetime
 from Database import Database
-
            
 class FrameCarPark:
     def __init__(self, nb, sizePerc, app, main):
@@ -540,6 +539,7 @@ class MarekWindow():
         self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))       
 
         self.app.mainloop()
+
 
     def addNotification(self, text):
         self.carPark.addNotification(text)
