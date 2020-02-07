@@ -6,9 +6,9 @@ class Finder:
     def __init__(self):
         ...
 
-    def findAll(self):
+    def findAll(self, fromDate, toDate):
         records = []
-        rows = Database("kvant.db").selectAllRecords()
+        rows = Database("kvant.db").selectAllRecords(fromDate, toDate)
         
         for row in rows:
             borr = False

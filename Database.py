@@ -113,12 +113,12 @@ class Database(AbstractDatabase):
     def deleteCompany(self, companyId):
         self.execute("DELETE FROM companies WHERE id = ?", (companyId, ))
 
-    def selectAllRecords(self):
-        self.execute("SELECT * FROM records WHERE departureTime is not ? AND ", (None,))
+    def selectAllRecords(self, fromDate, toDate):
+        self.execute("SELECT * FROM records WHERE departureTime is not ? AND arrivalTime >= ? AND departureTime <= ?", (None,fromDate,toDate))
         return self.fetchall()
 
     def selectAllCompanies(self):
-        self.execute("SELECT * FROM companies")
+        self.execute("SELECT name FROM companies")
         return self.fetchall()
     
     @overrides(AbstractDatabase)
