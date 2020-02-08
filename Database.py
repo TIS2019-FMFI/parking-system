@@ -104,7 +104,7 @@ class Database(AbstractDatabase):
     @overrides(AbstractDatabase)
     def updateCompany(self, companyId, newCompanyName):
         par = (companyId, newCompanyName)
-        self.execute("UPDATE companies SET name = ? WHERE companyId = ?")
+        self.execute("UPDATE companies SET name = ? WHERE companyId = ?", (newCompanyName, companyId))
 
 
     @overrides(AbstractDatabase)
@@ -131,8 +131,9 @@ class Database(AbstractDatabase):
         self.execute("SELECT * FROM notifications")
         return self.fetchall()
 
-    def selectAllRecords(self):
-        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL")
+    def selectAllRecords(self,fromDate, toDate ):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT ? AND "
+                     + "arrivalTime >= ? AND departureTime <= ?", (None,fromDate,toDate))
         return self.fetchall()
 
     def selectAllCompanies(self):
