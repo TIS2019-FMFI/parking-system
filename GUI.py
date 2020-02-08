@@ -6,19 +6,6 @@ from BOX import Box
 from Statistics import Statistics
 import datetime
 from Database import Database
-
-boxes = []
-
-##docasna funkcia len
-def find(arr, key):
-    for i in arr:
-        if i[1] == int(key):
-            if(len(i[0]) > 8):
-                return i[0][0:8]+'..'
-            else:
-                return i[0]
-    return 'NIC'
-
            
 class FrameCarPark:
     def __init__(self, nb, sizePerc, app, main):
@@ -29,7 +16,7 @@ class FrameCarPark:
         self.canvas.pack_propagate(0)
         # MALI BY SA NACITAVAT Z DB notifikacie
         # DOROBIT !!!
-        self.notifications = ['Box c. 15 konci.', 'Box c. 5 konci', 'Box c. 3435 konci', 'Box c. 6543 konci']
+        self.notifications = Database('kvant.db').selectAllNotifications()
         self.lb = Listbox(self.frame, relief = SUNKEN)
         for i in self.notifications:
             self.addNotification(i)
@@ -37,7 +24,7 @@ class FrameCarPark:
         self.lb.pack(side = 'right')
 
         # Parkovacie boxy
-        
+        self.boxes = []
         self.createBoxes(app, main)
         
         '''
@@ -85,10 +72,11 @@ class FrameCarPark:
             line = lineFromConfig(line)
 
             # Vytvorim Box
-            box = Box(line["boxId"], line["boxLabel"], str(int(line["companyId"])+1), line["invalid"])
+            box = Box(line["boxId"], line["boxLabel"], line["companyId"], line["invalid"])
 
             # Vytvorenie tlacidla pre box
-            companyName = Database("kvant.db").getCompanyNameById(int(line["companyId"])+1)
+            # companyName = Database.getCompanyNameById(line["conpanyId"])
+            companyName = "PLACEHOLDER"
             buttonText = "{0}\n{1}".format(line["boxLabel"], companyName)
             button = tk.Button(self.canvas, bg="grey", text=buttonText,
                                command=lambda opt = box: openBoxWin(opt, app, main))
@@ -99,35 +87,72 @@ class FrameCarPark:
 
             # Priradim tlacidlo a box dam do pola boxov
             box.setButton(button)
-            boxes.append(box)
+            self.boxes.append(box)
                         
         
 class FrameStatistics:
 
     def __init__(self, nb, sizePerc):
-
         self.frame = tk.Frame(nb)
-
         nb.add(self.frame, text="Štatistika")
-
-
-
         self.canvas = Canvas(self.frame,  width=sizePerc[0], height=sizePerc[1])
-
         self.canvas.pack(anchor='c', pady=30)
-
         self.canvas.pack_propagate(0)
 
-
-        frameTime = tk.Frame(self.canvas)
-        frameTime.pack(pady=20,padx=20, anchor='c')
-        
         fr1 = tk.Frame(self.canvas)
-
         fr1.pack(pady=5)
+        ecvSucetCasu = tk.IntVar()
+        ecvPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr1, text='súčet času', var = ecvSucetCasu)
+        ecvPocetZaznamov = tk.IntVar()
+        ecvPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr1, text='počet záznamov', var = ecvPocetZaznamov)
+        ecv = [ecvSucetCasu, ecvPocetZaznamov]
+
+        def checkEcv():
+            for i in ecv:
+                i.set(1)
+
+        ecvPorusujuceParkovani = ttk.Checkbutton(fr1, text='EČV porušujúce parkovanie', command = checkEcv)
+        ecvPorusujuceParkovani.pack(anchor='w')
+        ecvPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
+        ecvPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
+
+        fr2 = tk.Frame(self.canvas)
+        fr2.pack(pady=10)
+        firmySucetCasu = tk.IntVar()
+        firmyPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr2, text='súčet času', var = firmySucetCasu)
+        firmyPocetZaznomov = tk.IntVar()
+        firmyPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr2, text='počet záznamov', var = firmyPocetZaznomov)
+        firmy = [firmySucetCasu, firmyPocetZaznomov]
+
+        def checkFirmy():
+            for i in firmy:
+                i.set(1)
+
+        firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = checkFirmy)
+
+        firmyPorusujuceParkovani.pack(anchor='w')
+
+        firmyPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
+
+        firmyPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
+
+
+
+        fr3 = tk.Frame(self.canvas)
+
+        fr3.pack(pady=10)
+
+        obsadenostKazdyBox = tk.IntVar()
+
+        obsadenostBoxovKazdyBox = ttk.Checkbutton(fr3, text = 'každý box', var = obsadenostKazdyBox)
 
         
 
+        frameTime = tk.Frame(fr3)
+
+        obsadenostBoxCas = tk.IntVar()
+
+        obsadenostBoxovKazdyBoxVCase = ttk.Checkbutton(frameTime, text = 'každý box v čase ', var = obsadenostBoxCas)
 
         fromDay = ttk.Combobox(frameTime, values = [i for i in range(1,32)], width = 3)
         fromDay.current(0)
@@ -139,7 +164,7 @@ class FrameStatistics:
 
         labelBodka2 = ttk.Label(frameTime, text = '. ')
 
-        fromYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 4)
+        fromYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 3)
         fromYear.current(0)
 
         fromHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
@@ -162,7 +187,7 @@ class FrameStatistics:
 
         labelBodka4 = ttk.Label(frameTime, text = '. ')
 
-        toYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 4)
+        toYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 3)
         toYear.current(0)
 
         toHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
@@ -172,6 +197,28 @@ class FrameStatistics:
 
         toMinute = ttk.Combobox(frameTime, values = [i for i in range(00,60)], width = 3)
         toMinute.current(0)
+
+        obsadenost = [obsadenostBoxCas, obsadenostKazdyBox]
+
+
+
+        def checkObsadenost():
+
+            for i in obsadenost:
+
+                i.set(1)
+
+        
+
+        obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command= checkObsadenost)
+
+        obsadenostBoxov.pack(anchor='w')
+
+        obsadenostBoxovKazdyBox.pack(padx=20, anchor='w')
+
+        frameTime.pack(padx=20, anchor='w')
+
+        obsadenostBoxovKazdyBoxVCase.pack(side = 'left')
 
         fromDay.pack(side = 'left')        
 
@@ -228,106 +275,6 @@ class FrameStatistics:
         toMinute.pack_propagate(0)
 
 
-        ecvSucetCasu = tk.BooleanVar()
-
-        ecvPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr1, text='súčet času', var = ecvSucetCasu)
-
-        ecvPocetZaznamov = tk.BooleanVar()
-
-        ecvPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr1, text='počet záznamov', var = ecvPocetZaznamov)
-
-        ecv = [ecvSucetCasu, ecvPocetZaznamov]
-
-
-
-        def checkEcv():
-
-            for i in ecv:
-
-                i.set(True)
-
-
-
-        ecvPorusujuceParkovani = ttk.Checkbutton(fr1, text='EČV porušujúce parkovanie', command = checkEcv)
-
-        ecvPorusujuceParkovani.pack(anchor='w')
-
-        ecvPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
-
-        ecvPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
-
-
-
-        fr2 = tk.Frame(self.canvas)
-
-        fr2.pack(pady=10)
-
-        firmySucetCasu = tk.BooleanVar()
-
-        firmyPorusujuceParkovaniSucetCasu = ttk.Checkbutton(fr2, text='súčet času', var = firmySucetCasu)
-
-        firmyPocetZaznomov = tk.BooleanVar()
-
-        firmyPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr2, text='počet záznamov', var = firmyPocetZaznomov)
-
-        firmy = [firmySucetCasu, firmyPocetZaznomov]
-
-        def checkFirmy():
-
-            for i in firmy:
-
-                i.set(True)
-
-        firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = checkFirmy)
-
-        firmyPorusujuceParkovani.pack(anchor='w')
-
-        firmyPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
-
-        firmyPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
-
-
-
-        fr3 = tk.Frame(self.canvas)
-
-        fr3.pack(pady=10)
-
-        obsadenostKazdyBox = tk.BooleanVar()
-
-        obsadenostBoxovKazdyBox = ttk.Checkbutton(fr3, text = 'každý box', var = obsadenostKazdyBox)
-
-        
-
-        
-
-        obsadenostBoxCas = tk.BooleanVar()
-
-        obsadenostBoxovKazdyBoxVCase = ttk.Checkbutton(fr3, text = 'každý box v čase ', var = obsadenostBoxCas)
-
-        
-        obsadenost = [obsadenostBoxCas, obsadenostKazdyBox]
-
-
-
-        def checkObsadenost():
-
-            for i in obsadenost:
-
-                i.set(True)
-
-        
-
-        obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command= checkObsadenost)
-
-        obsadenostBoxov.pack(anchor='w')
-
-        obsadenostBoxovKazdyBox.pack(padx=20, anchor='w')
-
-        obsadenostBoxovKazdyBoxVCase.pack(side = 'left')
-
-        
-
-
 
         fr4 = tk.Frame(self.canvas)
 
@@ -367,13 +314,13 @@ class FrameStatistics:
 
         buttonGenerate = ttk.Button(self.canvas, text='Vygeneruj',
 
-                                    command = lambda: Statistics(ecvSucetCasu.get(), ecvPocetZaznamov.get(),
+                                    command = lambda: Statistics(ecvSucetCasu, ecvPocetZaznamov,
 
-                                                                 firmySucetCasu.get(), firmyPocetZaznomov.get(),
+                                                                 firmySucetCasu, firmyPocetZaznomov,
 
-                                                                 obsadenostBoxCas.get(), obsadenostKazdyBox.get(),
+                                                                 obsadenostBoxCas, obsadenostKazdyBox,
 
-                                                                 ZTPKazdyBox.get(), ZTPFirmy.get(), boxes,
+                                                                 ZTPKazdyBox, ZTPFirmy,
 
                                                                  datetime.datetime(int(fromYear.get()), int(fromMonth.get()), int(fromDay.get()), int(fromHour.get()), int(fromMinute.get())),
 
@@ -396,26 +343,25 @@ class FrameLessees:
         label = ttk.Label(fr2, text='Zoznam nájomníkov:')
         label.pack(padx = 5, pady = 5)
         
-        fr21 = Frame(fr2)
-        fr21.pack(padx = 10, pady = 10)
+        self.fr21 = Frame(fr2)
+        self.fr21.pack(padx = 10, pady = 10)
 
         fr3 = Frame(self.canvas)
         fr3.pack(side='right', padx=5)
         
-        self.lessees = ['Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo']
-        self.lessees = Database("kvant.db").selectAllCompanies()
-        self.lb = Listbox(fr21, relief=SUNKEN)
+        self.lessees = Database('kvant.db').selectAllCompanies()
+        self.lb = Listbox(self.fr21, relief=SUNKEN)
         for i in self.lessees:
             self.lb.insert(END, i)
         #self.lb.bind("<<ListboxSelect>>", onClickOnNotification)
 
-        scr = Scrollbar(fr21, command = self.lb.yview)
+        scr = Scrollbar(self.fr21, command = self.lb.yview)
         scr.pack(side = RIGHT, fill = Y)
         
         self.lb.config(yscrollcommand=scr.set)
         self.lb.pack(side='left')
         
-        buttonRemoveNajomnika = ttk.Button(fr2, text='Odstráň', command = lambda: removeNajomnika(self.lb.get(ACTIVE)))
+        buttonRemoveNajomnika = ttk.Button(fr2, text='Odstráň', command = lambda: self.removeNajomnika(self.lb.get(ACTIVE)))
         buttonRemoveNajomnika.pack(padx = 5, pady = 5)        
 
         self.entry = Entry(fr3)        
@@ -423,12 +369,34 @@ class FrameLessees:
         self.entry.pack(padx = 5, pady = 5)
 
         #self.entry.get()
-        buttonAddNajomnika = ttk.Button(fr3, text='Pridaj', command = lambda: addNajomnika(self.entry.get()))
+        buttonAddNajomnika = ttk.Button(fr3, text='Pridaj', command = lambda: self.addNajomnika(self.entry.get()))
         buttonAddNajomnika.pack(padx = 5, pady = 5)
-        
-        buttonSaveChanges = ttk.Button(fr3, text='Ulož')
-        buttonSaveChanges.pack(side='bottom', padx = 5, pady = 40)
 
+        buttonUpdateNajomnika = ttk.Button(fr3, text='Premenuj', command = lambda: self.renameNajomnika(self.entry.get(), self.lb.get(ACTIVE)))
+        buttonUpdateNajomnika.pack(padx = 5, pady = 5)
+
+    def renameNajomnika(self, newName, oldName):
+        Database('kvant.db').updateCompany(oldName[0], newName)       
+        ##tieto refreshe nechcu fungovat ...
+##        self.refreshLesses()
+        
+    def removeNajomnika(self, var):
+        Database('kvant.db').deleteCompany(var[0])
+##        self.refreshLesses()
+            
+    def addNajomnika(self, var):
+        Database('kvant.db').createCompany(var)
+        self.refreshLesses()
+        self.refresh()
+
+    # toto by mala byt funkcia na refresh zoznamu najomnikov po jeho uprave,
+    # no zatial nie je spravna
+    def refreshLesses(self):
+        self.lessees = Database('kvant.db').selectAllCompanies()
+        self.lb = Listbox(self.fr21, relief=SUNKEN)
+        for i in self.lessees:
+            self.lb.insert(END, i)
+    
 ## pomocne funkcie
 def openBoxWin(box, app, main):
     if box.record == None:
@@ -442,17 +410,8 @@ def openBoxWin(box, app, main):
 def changeBoxColorTo(b, color):
     b.config(background = color)
 
-def removeNajomnika(var):
-    print('removeNajomnika')
-    print(' ', var)
-
-def addNajomnika(var):
-    print('zavolam db pre addNajomnika')
-    print(' ', var)
-
 def onClickOnNotification(val):
-    print(val)
-    pass
+    print('notifikacia:', val)
 
 def getSizeForPercent(main, percento):
     width = (main.winfo_screenwidth()  // 100) * percento
@@ -522,9 +481,8 @@ class NewBoxWindow:
         entryECV.grid(row = 1, column = 1)
 
         # Firma, ktora zaparkovala
-        lessees = ['Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo','Lampy.sk', 'Malovanky', 'Kroksovo', 'Kosovo', 'Losovo']
-        lessees = Database("kvant.db").selectAllCompanies()
-        print(lessees)
+        lessees = Database('kvant.db').selectAllCompanies()
+        
         firma = StringVar()
         comboBoxFirmyLabel = ttk.Label(self.canvas, text="Firma, ktorej patri auto:")
         comboBoxFirmyLabel.grid(row = 2, column = 0, sticky = W, pady = 5)
@@ -536,10 +494,10 @@ class NewBoxWindow:
         checkBoxBorowed = ttk.Checkbutton(self.canvas, text = 'Zapožičané')
         checkBoxBorowed.grid(row = 3, column = 0, columnspan = 2)
 
-        buttonNahratFotku = ttk.Button(self.canvas, text = 'Nahrať fotku')
-        buttonNahratFotku.grid(row = 4, column = 0, columnspan = 2, pady = 20)
+##        buttonNahratFotku = ttk.Button(self.canvas, text = 'Nahrať fotku',  command= lambda: box.addPhoto())
+##        buttonNahratFotku.grid(row = 4, column = 0, columnspan = 2, pady = 20)
 
-        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBoxBorowed.instate(['selected']), Database("kvant.db").getCompanyNameByName(comboBoxFirmy.get())),
+        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBoxBorowed.instate(['selected']), firma.get()),
                                                                                                  main.addNotification("record in box {0}".format(box.boxLabel)),
                                                                                                  self.win.destroy()])
         buttonPotvrdit.grid(row = 5, column = 0, columnspan = 2, pady = 20)
@@ -578,8 +536,7 @@ class MarekWindow():
         
         self.carPark = FrameCarPark(self.nb, getSizeForPercent(self.app, 90), self.app, self)
         self.statistics = FrameStatistics(self.nb, getSizeForPercent(self.app, 60))
-        self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))
-       
+        self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))       
 
         self.app.mainloop()
 

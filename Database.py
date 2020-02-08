@@ -39,7 +39,7 @@ class AbstractDatabase(ABC):
     def deleteCompany(self, companyID):
         raise NotImplementedError
 
-    @abstractmethod    
+    @abstractmethod
     def createNotification(self, companyID):
         raise NotImplementedError
 
@@ -92,10 +92,8 @@ class Database(AbstractDatabase):
     @overrides(AbstractDatabase)
     def updateRecord(self, record):
         par = self.parameterFromRecord(record)
-        par = par + (record.recordId,)
-        self.execute("UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?, boxId = ?, " +
+        self.execute("UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?," +
                      "photoFileName = ?, status = ? WHERE recordId = ?", par)
-        
 
 
     @overrides(AbstractDatabase)
@@ -105,16 +103,16 @@ class Database(AbstractDatabase):
 
     @overrides(AbstractDatabase)
     def updateCompany(self, companyId, newCompanyName):
-        par = (newCompanyName,companyId,)
-        self.execute("UPDATE campanies SET name = ? WHERE id = ?",par)
+        par = (companyId, newCompanyName)
+        self.execute("UPDATE campanies SET name = ? WHERE id = ?")
 
 
     @overrides(AbstractDatabase)
     def deleteCompany(self, companyId):
-        self.execute("DELETE FROM companies WHERE id = ?", (companyId, ))
+        self.execute("DELETE FROM companies WHERE companyId = ?", (companyId, ))
 
-    def selectAllRecords(self, fromDate, toDate):
-        self.execute("SELECT * FROM records WHERE departureTime is not ? AND arrivalTime >= ? AND departureTime <= ?", (None,fromDate,toDate))
+    def selectAllRecords(self):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL")
         return self.fetchall()
 
     def selectAllCompanies(self):
@@ -133,15 +131,13 @@ class Database(AbstractDatabase):
         self.execute("SELECT * FROM notifications")
         return self.fetchall()
 
-    
-    def getCompanyNameById(self,id):
-        self.execute("SELECT name FROM companies where companyID=?",[id])
-        return self.fetchone()[0]
-    
-    def getCompanyNameByName(self,id):
-        print(id)
-        self.execute("SELECT companyID FROM companies where name=?",[id])
-        return self.fetchone()[0]
+    def selectAllRecords(self):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL")
+        return self.fetchall()
+
+    def selectAllCompanies(self):
+        self.execute("SELECT * FROM companies")
+        return self.fetchall()
 
 
 
