@@ -118,7 +118,7 @@ class Database(AbstractDatabase):
         return self.fetchall()
 
     def selectAllCompanies(self):
-        self.execute("SELECT name FROM companies")
+        self.execute("SELECT * FROM companies")
         return self.fetchall()
     
     @overrides(AbstractDatabase)
