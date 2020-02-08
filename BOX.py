@@ -28,6 +28,7 @@ class Box:
     def newParking(self, ECV, borrowed, companyId):
         if self.record is None:
             # Vytvori zaznam a ulozi ho do databazy
+            print(self.companyId, companyId)
             self.record = self.createRecord(ECV, borrowed, companyId, self.boxId, self.companyId)
             self.record.save()
             self.changeColor()

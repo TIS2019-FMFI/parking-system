@@ -27,7 +27,7 @@ class Record:
     # 3 stavy - 'good', 'borrowed', 'wrong'
     def setStatus(self, boxCompanyId):
         status = "good"
-        if(self.companyId != boxCompanyId):
+        if(str(self.companyId) != str(boxCompanyId)):
             if(self.borrowed):
                 status = "borrowed"
             else:
