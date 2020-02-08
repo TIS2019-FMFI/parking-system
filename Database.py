@@ -104,7 +104,7 @@ class Database(AbstractDatabase):
     @overrides(AbstractDatabase)
     def updateCompany(self, companyId, newCompanyName):
         par = (companyId, newCompanyName)
-        self.execute("UPDATE campanies SET name = ? WHERE id = ?")
+        self.execute("UPDATE companies SET name = ? WHERE companyId = ?")
 
 
     @overrides(AbstractDatabase)
@@ -138,6 +138,15 @@ class Database(AbstractDatabase):
     def selectAllCompanies(self):
         self.execute("SELECT * FROM companies")
         return self.fetchall()
+    
+    def getCompanyNameById(self,id):
+        self.execute("SELECT name FROM companies where companyID=?",[id])
+        return self.fetchone()[0]
+    
+    def getCompanyNameByName(self,id):
+        print(id)
+        self.execute("SELECT companyID FROM companies where name=?",[id])
+        return self.fetchone()[0]
 
 
 

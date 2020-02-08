@@ -6,6 +6,7 @@ from BOX import Box
 from Statistics import Statistics
 import datetime
 from Database import Database
+from Logger import Logger
            
 class FrameCarPark:
     def __init__(self, nb, sizePerc, app, main):
@@ -14,8 +15,6 @@ class FrameCarPark:
         self.canvas = Canvas(self.frame, width=sizePerc[0], height=sizePerc[1])
         self.canvas.pack(side='left')
         self.canvas.pack_propagate(0)
-        # MALI BY SA NACITAVAT Z DB notifikacie
-        # DOROBIT !!!
         self.notifications = Database('kvant.db').selectAllNotifications()
         self.lb = Listbox(self.frame, relief = SUNKEN)
         for i in self.notifications:
@@ -27,23 +26,6 @@ class FrameCarPark:
         self.boxes = []
         self.createBoxes(app, main)
         
-        '''
-        companies = [('KVANT',0),('Integard',1),('KVANTN',3),('skola.sk',4),('D4R7',5),('MKMs',6),('MTRUST',7),('BusinessMedia',8),('RESTAURACIA',9),('NIKTO',10)]
-        t = open('konfig-parkoviska.txt', 'r')
-        line = t.readline()
-        
-        while line != '':
-            r = line.split(';')
-            # id boxu, oznacenie boxu, X, Y, sirka, vyska, ID_firmy, ZTP
-            #print(r[0] + ';' + r[1] + ';' + str(int(float(r[2])) / self.canvas.winfo_screenwidth() * 100) + ';' + str(int(float(r[3])) / self.canvas.winfo_screenheight() * 100) + ';' + str(int(float(r[4])) / self.canvas.winfo_screenwidth() * 100) + ';' + str(int(float(r[5])) / self.canvas.winfo_screenheight() * 100) + ';' +r[6] + ';' + r[7])
-            box = Box(str(r[0]), str(r[1]), int(r[6]), self.canvas, app, tk.Button())
-            box.button = tk.Button(self.canvas, bg = 'gray', text = 'Box '+ str(r[1]) + '\n' + 'firma', command = lambda opt = box: openBoxWin(opt, app))
-            box.ztp = int(r[7])
-            box.button.place(x = (int(float(r[2]))/100*self.canvas.winfo_screenwidth() ), y = (int(float(r[3]))/100 *self.canvas.winfo_screenheight()), width = (int(float(r[4]))/100 * self.canvas.winfo_screenwidth()), height = (int(float(r[5])) / 100 * self.canvas.winfo_screenheight()))
-            self.boxes.append(box)
-            line = t.readline()
-        t.close()
-        '''
 
     def addNotification(self, text):
         self.lb.insert(END, text)
@@ -75,8 +57,8 @@ class FrameCarPark:
             box = Box(line["boxId"], line["boxLabel"], line["companyId"], line["invalid"])
 
             # Vytvorenie tlacidla pre box
-            # companyName = Database.getCompanyNameById(line["conpanyId"])
-            companyName = "PLACEHOLDER"
+            companyName = Database("kvant.db").getCompanyNameById(int(line["companyId"])+1)
+
             buttonText = "{0}\n{1}".format(line["boxLabel"], companyName)
             button = tk.Button(self.canvas, bg="grey", text=buttonText,
                                command=lambda opt = box: openBoxWin(opt, app, main))
@@ -92,6 +74,7 @@ class FrameCarPark:
         
 class FrameStatistics:
 
+    
     def __init__(self, nb, sizePerc):
         self.frame = tk.Frame(nb)
         nb.add(self.frame, text="Štatistika")
@@ -376,26 +359,26 @@ class FrameLessees:
         buttonUpdateNajomnika.pack(padx = 5, pady = 5)
 
     def renameNajomnika(self, newName, oldName):
-        Database('kvant.db').updateCompany(oldName[0], newName)       
-        ##tieto refreshe nechcu fungovat ...
-##        self.refreshLesses()
+        Database('kvant.db').updateCompany(oldName[0], newName)
+        Logger().info('Premenovanie firmy '+ oldName[1]+' na '+ newName+'.')
+        self.refreshLesses()
         
     def removeNajomnika(self, var):
         Database('kvant.db').deleteCompany(var[0])
-##        self.refreshLesses()
+        Logger().info('Vymazania firmy '+ str(var[0])+' '+ str(var[1])+'.')
+        self.refreshLesses()
             
     def addNajomnika(self, var):
         Database('kvant.db').createCompany(var)
+        Logger().info('Pridanie firmy '+ var +'.')
         self.refreshLesses()
-        self.refresh()
 
-    # toto by mala byt funkcia na refresh zoznamu najomnikov po jeho uprave,
-    # no zatial nie je spravna
     def refreshLesses(self):
         self.lessees = Database('kvant.db').selectAllCompanies()
-        self.lb = Listbox(self.fr21, relief=SUNKEN)
+        self.lb.delete(0, END)
         for i in self.lessees:
             self.lb.insert(END, i)
+##        self.lb.config(values=self.lessees)
     
 ## pomocne funkcie
 def openBoxWin(box, app, main):
@@ -403,7 +386,6 @@ def openBoxWin(box, app, main):
         currentBox = NewBoxWindow(box, app, main)
     else:
         currentBox = BoxWindow(box, app)
-
     box.changeColor()
     print("farba zmenena")
 
@@ -444,7 +426,9 @@ class BoxWindow:
 
         # Firma, ktorej auto parkuje
         # companyName = Database.getCompanyNameById(line["conpanyId"])
-        companyName = "PLACEHOLDER"
+        print('box.record.companyId',box.record.companyId)
+        companyName = Database("kvant.db").getCompanyNameById(box.record.companyId)
+            
         firma = ttk.Label(self.canvas, text= "Firma auta: {0}".format(companyName))
         firma.grid(row = 3, column = 0, columnspan = 2)
 
@@ -497,7 +481,7 @@ class NewBoxWindow:
 ##        buttonNahratFotku = ttk.Button(self.canvas, text = 'Nahrať fotku',  command= lambda: box.addPhoto())
 ##        buttonNahratFotku.grid(row = 4, column = 0, columnspan = 2, pady = 20)
 
-        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBoxBorowed.instate(['selected']), firma.get()),
+        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBoxBorowed.instate(['selected']), str(int(comboBoxFirmy.get()[0])-1)),
                                                                                                  main.addNotification("record in box {0}".format(box.boxLabel)),
                                                                                                  self.win.destroy()])
         buttonPotvrdit.grid(row = 5, column = 0, columnspan = 2, pady = 20)
@@ -538,7 +522,9 @@ class MarekWindow():
         self.statistics = FrameStatistics(self.nb, getSizeForPercent(self.app, 60))
         self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))       
 
+        Logger().info('Zapnutie aplikacie.')
         self.app.mainloop()
+        Logger().info('Vypnutie aplikacie.')
 
 
     def addNotification(self, text):

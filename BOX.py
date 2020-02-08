@@ -9,7 +9,7 @@ class Box:
         self.boxLabel = boxLabel
         self.companyId = companyId
         self.invalid = invalid
-
+        
         # buttom
         self.button = None
 
