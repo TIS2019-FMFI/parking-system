@@ -393,8 +393,7 @@ class FrameLessees:
     def isRemovable(self, var):
         for box in boxes:
             if box.record is not None:
-                print(box.record.companyId, var[0])
-                if box.record.companyId+1 == var[0]:
+                if int(box.record.companyId)+1 == int(var[0]):
                     return False
         return True
     
