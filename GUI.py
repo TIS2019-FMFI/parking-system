@@ -371,9 +371,10 @@ class FrameLessees:
         self.refreshLesses()
         
     def removeNajomnika(self, var):
-        Database('kvant.db').deleteCompany(var[0])
-        Logger().info('Vymazania firmy '+ str(var[0])+' '+ str(var[1])+'.')
-        self.refreshLesses()
+        if self.isRemovable(var):
+            Database('kvant.db').deleteCompany(var[0])
+            Logger().info('Vymazania firmy '+ str(var[0])+' '+ str(var[1])+'.')
+            self.refreshLesses()
             
     def addNajomnika(self, var):
         Database('kvant.db').createCompany(var)
@@ -385,7 +386,14 @@ class FrameLessees:
         self.lb.delete(0, END)
         for i in self.lessees:
             self.lb.insert(END, i)
-##        self.lb.config(values=self.lessees)
+                      
+    def isRemovable(self, var):
+        for box in boxes:
+            if box.record is not None:
+                print(box.record.companyId, var[0])
+                if box.record.companyId+1 == var[0]:
+                    return False
+        return True
     
 ## pomocne funkcie
 def openBoxWin(box, app, main):
