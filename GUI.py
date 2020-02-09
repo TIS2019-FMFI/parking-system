@@ -372,6 +372,7 @@ class FrameLessees:
         Database('kvant.db').updateCompany(int(oldName[0]), newName)
         Logger().info('Premenovanie firmy '+ oldName[1]+' na '+ newName+'.')
         self.refreshLesses()
+        self.refreshBoxes(newName, oldName)
         
     def removeNajomnika(self, var):
         if self.isRemovable(var):
@@ -384,6 +385,12 @@ class FrameLessees:
         Logger().info('Pridanie firmy '+ var +'.')
         self.refreshLesses()
 
+    def refreshBoxes(self, newName, oldName):
+        for box in boxes:
+            if int(oldName[0]) == int(box.companyId)+1:
+                print(box.boxLabel, newName)                
+                box.button.config(text="{0}\n{1}".format(box.boxLabel, newName))
+       
     def refreshLesses(self):
         self.lessees = Database('kvant.db').selectAllCompanies()
         self.lb.delete(0, END)
