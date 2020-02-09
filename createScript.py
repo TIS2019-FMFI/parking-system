@@ -1,4 +1,5 @@
 import sqlite3
+from Database import Database
 
 connection = sqlite3.connect("kvant.db")
 cursor = connection.cursor()
@@ -33,6 +34,13 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS notifications
                    name TEXT)''')
 
 print("Tables created")
+
+def fill_data(data):
+    db=Database("kvant.db")
+    for i in data:
+        db.createCompany(i)
+fill_data(['KVANT', 'Integard', 'D4R7', 'Škola.sk', 'MKMs', 'MTRUST', 'Businessmedia', 'Reštaurácia'])
+
 # Save (commit) the changes
 connection.commit()
 
