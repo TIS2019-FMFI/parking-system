@@ -142,7 +142,10 @@ class Database(AbstractDatabase):
     
     def getCompanyNameById(self,id):
         self.execute("SELECT name FROM companies where companyID=?",[id])
-        return self.fetchone()[0]
+        company = self.fetchone()
+        if company is None:
+            return None
+        return company[0]
     
     def getCompanyNameByName(self,id):
         print(id)
