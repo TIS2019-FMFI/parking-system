@@ -60,7 +60,10 @@ class FrameCarPark:
 
             # Vytvorenie tlacidla pre box
             companyName = Database("kvant.db").getCompanyNameById(int(line["companyId"])+1)
-
+            if companyName is None:
+                companyName = 'KVANT'
+                box.companyId = Database("kvant.db").getCompanyNameByName('KVANT')
+                      
             buttonText = "{0}\n{1}".format(line["boxLabel"], companyName)
             button = tk.Button(self.canvas, bg="grey", text=buttonText,
                                command=lambda opt = box: openBoxWin(opt, app, main))
