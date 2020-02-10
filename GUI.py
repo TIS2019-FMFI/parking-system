@@ -7,6 +7,7 @@ from Statistics import Statistics
 import datetime
 from Database import Database
 from Logger import Logger
+from Record import Record
 
 boxes = []
            
@@ -25,13 +26,14 @@ class FrameCarPark:
         self.lb.pack(side = 'right')
 
         # Parkovacie boxy
-        
         self.createBoxes(app, main)
+        self.loadRecords()
         
 
     def addNotification(self, text):
         self.lb.insert(END, text)
 
+    # Vytvori boxy podla config filu a vykresli ich na obrazovku
     def createBoxes(self, app, main):
 
         def lineFromConfig(line):
@@ -52,6 +54,8 @@ class FrameCarPark:
 
 
         configFile = open("konfig-parkoviska.txt", "r")
+        Logger().info("ConfigFile úspešne otvorený")
+        
         for line in configFile:
             line = lineFromConfig(line)
 
@@ -62,7 +66,7 @@ class FrameCarPark:
             companyName = Database("kvant.db").getCompanyNameById(int(line["companyId"])+1)
             if companyName is None:
                 companyName = 'KVANT'
-                box.companyId = Database("kvant.db").getCompanyNameByName('KVANT')
+                box.companyId = Database("kvant.db").getCompanyIdByName('KVANT')
                       
             buttonText = "{0}\n{1}".format(line["boxLabel"], companyName)
             button = tk.Button(self.canvas, bg="grey", text=buttonText,
@@ -75,11 +79,36 @@ class FrameCarPark:
             # Priradim tlacidlo a box dam do pola boxov
             box.setButton(button)
             boxes.append(box)
+            Logger().info("Box (id = {}) úspešne vykreslený".format(line["boxId"]))
+            
+        configFile.close()
+        Logger().info("ConfigFile úspešne dočitaný")
+        Logger().info("Boxy úspešne vykreslené")
+
+    # Pri spusteni aplikacie nacita zaznamy, ktore su stale aktualne
+    # A priradi ich prislusnym boxom
+    def loadRecords(self):
+        
+        def getBoxById(boxId):
+            for b in boxes:
+                if(b.boxId == boxId):
+                    return b
+        
+        dbRecords = Database('kvant.db').getAllRunningRecords()
+        for dbRecord in dbRecords:
+            # Vytvori novy prazdny 'zaznam' a inicializuje ho hodnotami z DB
+            newRecord = Record(None, None, None, None, None)
+            newRecord.initFromDatabaseRecord(dbRecord)
+
+            # A tento rekord priradi svojmu boxu
+            box = getBoxById(newRecord.boxId)
+            box.record = newRecord
+            box.changeColor()
+            Logger().info("Záznam (id = {}) úspešne obnovený z DB".format(newRecord.recordId))
+            
                         
         
 class FrameStatistics:
-
-    
     def __init__(self, nb, sizePerc):
         self.frame = tk.Frame(nb)
         nb.add(self.frame, text="Štatistika")
@@ -92,8 +121,6 @@ class FrameStatistics:
 
         fr1 = tk.Frame(self.canvas)
         fr1.pack(pady=5)
-        
-        
 
         fromDay = ttk.Combobox(frameTime, values = [i for i in range(1,32)], width = 3)
         fromDay.current(0)
@@ -140,57 +167,47 @@ class FrameStatistics:
         toMinute.current(0)
 
         fromDay.pack(side = 'left')        
-
         fromDay.pack_propagate(0)
 
         labelBodka1.pack(side = 'left')
 
         fromMonth.pack(side = 'left')        
-
         fromMonth.pack_propagate(0)
 
         labelBodka2.pack(side = 'left')
 
         fromYear.pack(side = 'left')        
-
         fromYear.pack_propagate(0)
 
         fromHour.pack(side = 'left')        
-
         fromHour.pack_propagate(0)
 
         labelDvojbodka1.pack(side = 'left')
 
         fromMinute.pack(side = 'left')
-
         fromMinute.pack_propagate(0)
 
         labelPomlcka.pack(side = 'left')
 
         toDay.pack(side = 'left')        
-
         toDay.pack_propagate(0)
 
         labelBodka3.pack(side = 'left')
 
         toMonth.pack(side = 'left')        
-
         toMonth.pack_propagate(0)
 
         labelBodka4.pack(side = 'left')
 
         toYear.pack(side = 'left')        
-
         toYear.pack_propagate(0)
 
         toHour.pack(side = 'left')
-
         toHour.pack_propagate(0)
 
         labelDvojbodka2.pack(side = 'left')
 
         toMinute.pack(side = 'left')
-
         toMinute.pack_propagate(0)
 
         
@@ -222,103 +239,57 @@ class FrameStatistics:
                 i.set(1)
 
         firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = checkFirmy)
-
         firmyPorusujuceParkovani.pack(anchor='w')
-
         firmyPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
-
         firmyPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
 
-
-
         fr3 = tk.Frame(self.canvas)
-
         fr3.pack(pady=10)
 
         obsadenostKazdyBox = tk.IntVar()
-
         obsadenostBoxovKazdyBox = ttk.Checkbutton(fr3, text = 'každý box', var = obsadenostKazdyBox)
 
-        
-
         obsadenostBoxCas = tk.IntVar()
-
         obsadenostBoxovKazdyBoxVCase = ttk.Checkbutton(fr3, text = 'každý box v čase ', var = obsadenostBoxCas)
 
         obsadenost = [obsadenostBoxCas, obsadenostKazdyBox]
 
-
-
         def checkObsadenost():
-
             for i in obsadenost:
-
                 i.set(1)
 
-        
-
         obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command= checkObsadenost)
-
         obsadenostBoxov.pack(anchor='w')
-
         obsadenostBoxovKazdyBox.pack(padx=20, anchor='w')
-
         obsadenostBoxovKazdyBoxVCase.pack(side = 'left')
 
-        
-
-
-
         fr4 = tk.Frame(self.canvas)
-
         fr4.pack(pady=10)
 
         ZTPKazdyBox = tk.IntVar()
-
         vyuzivaniemiestaPreZtpKazdyBox = ttk.Checkbutton(fr4, text = 'každý box', var = ZTPKazdyBox)
 
         ZTPFirmy = tk.IntVar()
-
         vyuzivaniemiestaPreZtpPodlaFiriem = ttk.Checkbutton(fr4, text = 'podľa firiem', var = ZTPFirmy)
 
         ztp = [ZTPKazdyBox, ZTPFirmy]
 
-        
-
         def checkZTP():
-
             for i in ztp:
-
                 i.set(1)
 
-                
-
         vyuzivaniemiestaPreZtp = ttk.Checkbutton(fr4, text = 'Využívanie miesta pre ZŤP', command = checkZTP)
-
         vyuzivaniemiestaPreZtp.pack(anchor='w')
-
         vyuzivaniemiestaPreZtpKazdyBox.pack(padx=20, anchor='w')
-
         vyuzivaniemiestaPreZtpPodlaFiriem.pack(padx=20, anchor='w')
 
-        
-
-
-
         buttonGenerate = ttk.Button(self.canvas, text='Vygeneruj',
-
                                     command = lambda: Statistics(ecvSucetCasu, ecvPocetZaznamov,
-
                                                                  firmySucetCasu, firmyPocetZaznomov,
-
                                                                  obsadenostBoxCas, obsadenostKazdyBox,
-
                                                                  ZTPKazdyBox, ZTPFirmy, boxes,
-
                                                                  datetime.datetime(int(fromYear.get()), int(fromMonth.get()), int(fromDay.get()), int(fromHour.get()), int(fromMinute.get())),
-
                                                                  datetime.datetime(int(toYear.get()), int(toMonth.get()), int(toDay.get()), int(toHour.get()), int(toMinute.get()))))
-
         buttonGenerate.pack()
         
 class FrameLessees:
@@ -511,30 +482,8 @@ class NewBoxWindow:
         buttonPotvrdit.grid(row = 5, column = 0, columnspan = 2, pady = 20)
         
         self.win.mainloop()
-        
-class MainWindow:
-    def __init__(self):
-        self.app = Tk()
-        self.window()
-        
-        self.nb = ttk.Notebook(self.app)
-        self.nb.pack()
-        
-        self.carPark = FrameCarPark(self.nb, getSizeForPercent(self.app, 90), self.app)
-        self.statistics = FrameStatistics(self.nb, getSizeForPercent(self.app, 60))
-        self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))
 
-        self.app.mainloop()
-
-
-    def addNotification(self, text):
-        self.carPark.addNotification(text)
-        
-    def window(self):
-        self.app.title('Parkovací systém')
-        self.app.geometry('{}x{}'.format(self.app.winfo_screenwidth(), self.app.winfo_screenheight()))
-
-class MarekWindow():
+class MainWindow():
     def __init__(self, root, title):
         self.app = root
         self.window(title)
@@ -546,18 +495,25 @@ class MarekWindow():
         self.statistics = FrameStatistics(self.nb, getSizeForPercent(self.app, 60))
         self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))       
 
-        Logger().info('Zapnutie aplikacie.')
         self.app.mainloop()
-        Logger().info('Vypnutie aplikacie.')
 
-
+    # Moze sa vymazat
     def addNotification(self, text):
         self.carPark.addNotification(text)
         
     def window(self, title):
         self.app.title(title)
         self.app.geometry('{}x{}'.format(self.app.winfo_screenwidth(), self.app.winfo_screenheight()))
+        
 
 if __name__ == '__main__':
+    Logger(mode="reset")
+    Logger().info('Zapnutie aplikacie.')
+
     root = Tk()
-    main = MarekWindow(root, 'Parkovací systém')
+    main = MainWindow(root, 'Parkovací systém')
+    
+    Logger().info('Vypnutie aplikacie.')
+
+
+

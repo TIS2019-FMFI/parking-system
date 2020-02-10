@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import sqlite3
+from Logger import Logger
 
 # Vytvorit zaznam a hned vratit ID - hned nastavi danemu reco
 # Update zaznamu podla ID
@@ -91,9 +92,10 @@ class Database(AbstractDatabase):
 
     @overrides(AbstractDatabase)
     def updateRecord(self, record):
-        par = self.parameterFromRecord(record)
+        par = self.parameterFromRecord(record) + (record.recordId, )
+        print(par)
         self.execute("UPDATE records SET ECV = ?, arrivalTime = ?, departureTime = ?, companyId = ?," +
-                     "photoFileName = ?, status = ? WHERE recordId = ?", par)
+                     "boxId = ?, photoFileName = ?, status = ? WHERE recordId = ?", par)
 
 
     @overrides(AbstractDatabase)
@@ -147,10 +149,16 @@ class Database(AbstractDatabase):
             return None
         return company[0]
     
-    def getCompanyNameByName(self,id):
+    def getCompanyIdByName(self,id):
         print(id)
         self.execute("SELECT companyID FROM companies where name=?",[id])
         return self.fetchone()[0]
+
+    # Pri novom pusteni appky
+    # Vrati vsetky zaznamy, ktore este neboli ukoncene
+    def getAllRunningRecords(self):
+        self.execute("SELECT * FROM records WHERE departureTime IS NULL")
+        return self.fetchall()
 
 
 
