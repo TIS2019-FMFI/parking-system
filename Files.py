@@ -4,5 +4,5 @@ class File:
     def choosePhoto():
         fileName = askopenfile()
         print(fileName)
-        return fileName
+        return fileName.name
     

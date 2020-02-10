@@ -21,6 +21,7 @@ class Record:
     def addPhoto(self):
         name = File.choosePhoto()
         self.photoFileName = name
+        
 
 
     # Urcute status pre zaznam
