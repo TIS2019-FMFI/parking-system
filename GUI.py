@@ -18,12 +18,14 @@ class FrameCarPark:
         self.canvas = Canvas(self.frame, width=sizePerc[0], height=sizePerc[1])
         self.canvas.pack(side='left')
         self.canvas.pack_propagate(0)
-        self.notifications = Database('kvant.db').selectAllNotifications()
-        self.lb = Listbox(self.frame, relief = SUNKEN)
-        for i in self.notifications:
-            self.addNotification(i)
-        self.lb.bind("<<ListboxSelect>>", onClickOnNotification)
-        self.lb.pack(side = 'right')
+        self.sizePerc = sizePerc
+
+##        self.notifications = Database('kvant.db').selectAllNotifications()
+##        self.lb = Listbox(self.frame, relief = SUNKEN)
+##        for i in self.notifications:
+##            self.addNotification(i)
+##        self.lb.bind("<<ListboxSelect>>", onClickOnNotification)
+##        self.lb.pack(side = 'right')
 
         # Parkovacie boxy
         self.createBoxes(app, main)
@@ -31,7 +33,8 @@ class FrameCarPark:
         
 
     def addNotification(self, text):
-        self.lb.insert(END, text)
+        pass
+##        self.lb.insert(END, text)
 
     # Vytvori boxy podla config filu a vykresli ich na obrazovku
     def createBoxes(self, app, main):
@@ -69,7 +72,11 @@ class FrameCarPark:
                 box.companyId = Database("kvant.db").getCompanyIdByName('KVANT')
                       
             buttonText = "{0}\n{1}".format(line["boxLabel"], companyName)
-            button = tk.Button(self.canvas, bg="grey", text=buttonText,
+            
+            fontStyle = ('Helvetica ','9')
+            if self.sizePerc[0] > 1080:                
+                fontStyle = ('Helvetica ','12')
+            button = tk.Button(self.canvas, bg="grey", text=buttonText, font = fontStyle,
                                command=lambda opt = box: openBoxWin(opt, app, main))
             button.place(x = int(line["x"] / 100 * self.canvas.winfo_screenwidth()),
                          y = int(line["y"] / 100 * self.canvas.winfo_screenheight()),
@@ -416,7 +423,7 @@ class BoxWindow:
         labelEcv.grid(row = 1, column = 0, columnspan = 2)
 
         # Zaciatok parkovania
-        startTime = ttk.Label(self.canvas, text = "Začiatok parkovania: {0}".format(box.record.arrivalTime))
+        startTime = ttk.Label(self.canvas, text = "Začiatok parkovania: {0}".format(box.record.arrivalTime)[:-7])
         startTime.grid(row = 2, column = 0, columnspan = 2)
 
         # Firma, ktorej auto parkuje
@@ -454,7 +461,7 @@ class NewBoxWindow:
 
         # ECV vozidla        
         entryECVLabel = ttk.Label(self.canvas, text="Zadaj EČV vozidla:")
-        entryECVLabel.grid(row = 1, column = 0, sticky = W)
+        entryECVLabel.grid(row = 1, column = 0, sticky = W, padx = 15)
         
         entryECV = Entry(self.canvas)
         entryECV.grid(row = 1, column = 1)
@@ -464,19 +471,21 @@ class NewBoxWindow:
         
         firma = StringVar()
         comboBoxFirmyLabel = ttk.Label(self.canvas, text="Firma, ktorej patri auto:")
-        comboBoxFirmyLabel.grid(row = 2, column = 0, sticky = W, pady = 5)
+        comboBoxFirmyLabel.grid(row = 2, column = 0, sticky = W, pady = 5,  padx = 15)
         
         comboBoxFirmy = ttk.Combobox(self.canvas, values = lessees)
-        comboBoxFirmy.grid(row = 2, column = 1, pady = 5)
+        comboBoxFirmy.grid(row = 2, column = 1, pady = 5, padx =10)
         
         # CheckButton pre zapozicanie
-        checkBoxBorowed = ttk.Checkbutton(self.canvas, text = 'Zapožičané')
+        checkBorrowed = IntVar()
+        checkBorrowed.set(1)
+        checkBoxBorowed = tk.Checkbutton(self.canvas, text = 'Zapožičané', variable = checkBorrowed, onvalue = 1, offvalue = 1)
         checkBoxBorowed.grid(row = 3, column = 0, columnspan = 2)
-
+        
 ##        buttonNahratFotku = ttk.Button(self.canvas, text = 'Nahrať fotku',  command= lambda: box.addPhoto())
 ##        buttonNahratFotku.grid(row = 4, column = 0, columnspan = 2, pady = 20)
 
-        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBoxBorowed.instate(['selected']), str(int(comboBoxFirmy.get()[0])-1)),
+        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBorrowed.get(), str(int(comboBoxFirmy.get()[0])-1)),
                                                                                                  main.addNotification("record in box {0}".format(box.boxLabel)),
                                                                                                  self.win.destroy()])
         buttonPotvrdit.grid(row = 5, column = 0, columnspan = 2, pady = 20)
@@ -496,10 +505,6 @@ class MainWindow():
         self.lessees = FrameLessees(self.nb, getSizeForPercent(self.app, 45))       
 
         self.app.mainloop()
-
-    # Moze sa vymazat
-    def addNotification(self, text):
-        self.carPark.addNotification(text)
         
     def window(self, title):
         self.app.title(title)
