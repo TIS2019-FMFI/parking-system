@@ -8,6 +8,8 @@ import datetime
 from Database import Database
 from Logger import Logger
 from Record import Record
+from tkinter import messagebox
+
 
 boxes = []
            
@@ -20,21 +22,9 @@ class FrameCarPark:
         self.canvas.pack_propagate(0)
         self.sizePerc = sizePerc
 
-##        self.notifications = Database('kvant.db').selectAllNotifications()
-##        self.lb = Listbox(self.frame, relief = SUNKEN)
-##        for i in self.notifications:
-##            self.addNotification(i)
-##        self.lb.bind("<<ListboxSelect>>", onClickOnNotification)
-##        self.lb.pack(side = 'right')
-
         # Parkovacie boxy
         self.createBoxes(app, main)
         self.loadRecords()
-        
-
-    def addNotification(self, text):
-        pass
-##        self.lb.insert(END, text)
 
     # Vytvori boxy podla config filu a vykresli ich na obrazovku
     def createBoxes(self, app, main):
@@ -324,7 +314,6 @@ class FrameLessees:
         self.lb = Listbox(self.fr21, relief=SUNKEN)
         for i in self.lessees:
             self.lb.insert(END, i)
-        #self.lb.bind("<<ListboxSelect>>", onClickOnNotification)
 
         scr = Scrollbar(self.fr21, command = self.lb.yview)
         scr.pack(side = RIGHT, fill = Y)
@@ -339,7 +328,6 @@ class FrameLessees:
         self.entry.insert(0, 'Zadaj firmu.')
         self.entry.pack(padx = 5, pady = 5)
 
-        #self.entry.get()
         buttonAddNajomnika = ttk.Button(fr3, text='Pridaj', command = lambda: self.addNajomnika(self.entry.get()))
         buttonAddNajomnika.pack(padx = 5, pady = 5)
 
@@ -350,25 +338,22 @@ class FrameLessees:
         Database('kvant.db').updateCompany(int(oldName[0]), newName)
         Logger().info('Premenovanie firmy '+ oldName[1]+' na '+ newName+'.')
         self.refreshLesses()
-        self.refreshBoxes(newName, oldName)
+        messagebox.showinfo("Pozor","Vypnite a následne zapnite aplikáciu, prosím.")
         
     def removeNajomnika(self, var):
         if self.isRemovable(var):
             Database('kvant.db').deleteCompany(var[0])
             Logger().info('Vymazania firmy '+ str(var[0])+' '+ str(var[1])+'.')
             self.refreshLesses()
+            messagebox.showinfo("Pozor", "Vypnite a následne zapnite aplikáciu, prosím.")
+        else:
+            messagebox.showinfo("Pozor","Firmu nemožno vymazať pokiaľ existujú jej bežiace záznamy na parkovisku.")
             
     def addNajomnika(self, var):
         Database('kvant.db').createCompany(var)
         Logger().info('Pridanie firmy '+ var +'.')
         self.refreshLesses()
 
-    def refreshBoxes(self, newName, oldName):
-        for box in boxes:
-            if int(oldName[0]) == int(box.companyId)+1:
-                print(box.boxLabel, newName)                
-                box.button.config(text="{0}\n{1}".format(box.boxLabel, newName))
-       
     def refreshLesses(self):
         self.lessees = Database('kvant.db').selectAllCompanies()
         self.lb.delete(0, END)
@@ -378,7 +363,7 @@ class FrameLessees:
     def isRemovable(self, var):
         for box in boxes:
             if box.record is not None:
-                if int(box.record.companyId)+1 == int(var[0]):
+                if int(box.record.companyId) == int(var[0]):
                     return False
         return True
     
@@ -389,13 +374,9 @@ def openBoxWin(box, app, main):
     else:
         currentBox = BoxWindow(box, app)
     box.changeColor()
-    print("farba zmenena")
 
 def changeBoxColorTo(b, color):
     b.config(background = color)
-
-def onClickOnNotification(val):
-    print('notifikacia:', val)
 
 def getSizeForPercent(main, percento):
     width = (main.winfo_screenwidth()  // 100) * percento
@@ -427,7 +408,6 @@ class BoxWindow:
         startTime.grid(row = 2, column = 0, columnspan = 2)
 
         # Firma, ktorej auto parkuje
-        # companyName = Database.getCompanyNameById(line["conpanyId"])
         print('box.record.companyId',type(box.record.companyId))
         companyName = Database("kvant.db").getCompanyNameById(int(box.record.companyId)+1)
             
@@ -438,6 +418,11 @@ class BoxWindow:
         typParkovania = ttk.Label(self.canvas, text = "{0}".format(box.record.getTypeOfParking()))
         typParkovania.grid(row = 4, column = 0, columnspan = 2)
 
+        if box.record.photo is not None:            
+            myvar = tk.Button(self.canvas, image = box.record.photo)
+            myvar.image = box.record.photo
+            myvar.grid(row = 7, column = 0, columnspan = 2, pady = 20)
+         
         buttonNahratFotku = tk.Button(self.canvas, text = 'Nahrať fotku', command= lambda: box.addPhoto())
         buttonNahratFotku.grid(row = 5, column = 0, columnspan = 2, pady = 20)
 
@@ -448,7 +433,6 @@ class NewBoxWindow:
     def __init__(self, box, app, main):
         print("Novy box {0}".format(box.boxLabel))
         
-        #self.win = Tk()
         self.win = Toplevel()
         self.win.title('Box')
         sizePerc = getSizeForPercent(app, 30)
