@@ -7,14 +7,12 @@ cursor = connection.cursor()
 
 cursor.execute("DROP TABLE IF EXISTS records")
 cursor.execute("DROP TABLE IF EXISTS companies")
+cursor.execute("DROP TABLE IF EXISTS boxes")
 
 # Table from companies
 cursor.execute('''CREATE TABLE IF NOT EXISTS companies
                   (companyID INTEGER PRIMARY KEY AUTOINCREMENT,
                    name TEXT)''')
-
-# Insert firiem, ktore uz existuje podla ID v configu
-# DOROBIT !!!
 
 # Table for records
 cursor.execute('''CREATE TABLE IF NOT EXISTS records
@@ -33,7 +31,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS notifications
                   (notificationId INTEGER PRIMARY KEY AUTOINCREMENT,
                    name TEXT)''')
 
-print("Tables created")
+print("Tables created.")
 
 def fill_data(data):
     db=Database("kvant.db")
@@ -46,3 +44,5 @@ connection.commit()
 
 # Close connection
 connection.close()
+
+print("All done!")

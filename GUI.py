@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 import os
-from BOX import Box
+from Box import Box
 from Statistics import Statistics
 import datetime
 from Database import Database
@@ -42,7 +42,7 @@ class FrameCarPark:
         def lineFromConfig(line):
             # 0 = ID_boxu, 1 = oznacenie boxu, 2 = X, 3 = Y, 4 = sirka, 5 = vyska, 6 = ID_firmy, 7 = ZTP
             result = dict()
-            line = line.split(';')
+            line = line.strip().split(';')
             
             result["boxId"] = int(line[0])
             result["boxLabel"] = str(line[1])
@@ -51,8 +51,8 @@ class FrameCarPark:
             result["width"] = float(line[4])
             result["height"] = float(line[5])
             result["companyId"] = int(line[6])
-            result["invalid"] = bool(line[7])
-            
+            result["invalid"] = bool(int(line[7]))
+
             return result
 
 
@@ -62,11 +62,11 @@ class FrameCarPark:
         for line in configFile:
             line = lineFromConfig(line)
 
-            # Vytvorim Box
+            # Vytvorim Box a vlozim jeho zakladne info do tabulky (pre statistiku)
             box = Box(line["boxId"], line["boxLabel"], line["companyId"], line["invalid"])
 
             # Vytvorenie tlacidla pre box
-            companyName = Database("kvant.db").getCompanyNameById(int(line["companyId"])+1)
+            companyName = Database("kvant.db").getCompanyNameById(line["companyId"])
             if companyName is None:
                 companyName = 'KVANT'
                 box.companyId = Database("kvant.db").getCompanyIdByName('KVANT')
@@ -142,7 +142,7 @@ class FrameStatistics:
         fromYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 4)
         fromYear.current(0)
 
-        fromHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
+        fromHour = ttk.Combobox(frameTime, values = [i for i in range(0,24)], width = 3)
         fromHour.current(0)
 
         labelDvojbodka1 = tk.Label(frameTime, text = ' : ')
@@ -165,7 +165,7 @@ class FrameStatistics:
         toYear = ttk.Combobox(frameTime, values = [i for i in range(2019,2050)], width = 4)
         toYear.current(0)
 
-        toHour = ttk.Combobox(frameTime, values = [i for i in range(1,24)], width = 3)
+        toHour = ttk.Combobox(frameTime, values = [i for i in range(0,24)], width = 3)
         toHour.current(0)
 
         labelDvojbodka2 = tk.Label(frameTime, text = ' : ')
@@ -406,7 +406,7 @@ class BoxWindow:
     def __init__(self, box, app):
         print(box.record)
         print("ECV = {0}".format(box.record.ECV))
-        self.win = Tk()
+        self.win = Toplevel()
         self.win.title('Box')
         sizePerc = getSizeForPercent(app, 60)
         self.win.geometry('{}x{}'.format(sizePerc[0], sizePerc[1]))
@@ -448,12 +448,13 @@ class NewBoxWindow:
     def __init__(self, box, app, main):
         print("Novy box {0}".format(box.boxLabel))
         
-        self.win = Tk()
+        #self.win = Tk()
+        self.win = Toplevel()
         self.win.title('Box')
         sizePerc = getSizeForPercent(app, 30)
         self.win.geometry('{}x{}'.format(sizePerc[0], sizePerc[1]))
 
-        self.canvas = Canvas(self.win, width = sizePerc[0]-100, height = sizePerc[1]-100)
+        self.canvas = Canvas(self.win, width = sizePerc[0]-100, height = sizePerc[1]-100, borderwidth = 0, highlightthickness = 0)
         self.canvas.pack(anchor="c")
 
         label = ttk.Label(self.canvas, text='Parkovací box {0}'.format(box.boxLabel), font=("Ariel", 25))
@@ -478,19 +479,16 @@ class NewBoxWindow:
         
         # CheckButton pre zapozicanie
         checkBorrowed = IntVar()
-        checkBorrowed.set(1)
-        checkBoxBorowed = tk.Checkbutton(self.canvas, text = 'Zapožičané', variable = checkBorrowed, onvalue = 1, offvalue = 1)
-        checkBoxBorowed.grid(row = 3, column = 0, columnspan = 2)
+        #checkBorrowed.set(False) #, onvalue = 1, offvalue = 0
+        checkBoxBorrowed = tk.Checkbutton(self.canvas, text='Zapožičané', variable=checkBorrowed, onvalue=1, offvalue=0)
+        checkBoxBorrowed.grid(row = 3, column = 0, columnspan = 2)
         
 ##        buttonNahratFotku = ttk.Button(self.canvas, text = 'Nahrať fotku',  command= lambda: box.addPhoto())
 ##        buttonNahratFotku.grid(row = 4, column = 0, columnspan = 2, pady = 20)
 
-        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get(), checkBorrowed.get(), str(int(comboBoxFirmy.get()[0])-1)),
-                                                                                                 main.addNotification("record in box {0}".format(box.boxLabel)),
+        buttonPotvrdit = ttk.Button(self.canvas, text = 'Potvrdiť', width=28, command = lambda: [box.newParking(entryECV.get().upper(), checkBorrowed.get(), str(int(comboBoxFirmy.get()[0]))),
                                                                                                  self.win.destroy()])
         buttonPotvrdit.grid(row = 5, column = 0, columnspan = 2, pady = 20)
-        
-        self.win.mainloop()
 
 class MainWindow():
     def __init__(self, root, title):
