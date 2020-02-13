@@ -28,7 +28,6 @@ class Record:
     # 3 stavy - 'good', 'borrowed', 'wrong'
     def setStatus(self, boxCompanyId):
         status = "good"
-        print('dd', self.borrowed)
         if(str(self.companyId) != str(boxCompanyId)):
             if self.borrowed == 1:
                 status = "borrowed"
@@ -55,7 +54,6 @@ class Record:
     def save(self):
         recordId = Database("kvant.db").createRecord(self)
         self.recordId = recordId
-        # print(self)
 
 
     # Vracia aktualny systemovy cas
@@ -81,7 +79,7 @@ class Record:
         self.recordId = record[0]
         self.ECV = record[1]
         self.arrivalTime = datetime.datetime.strptime(record[2], '%Y-%m-%d %H:%M:%S.%f')
-        self.departureTime = None
+        self.departureTime = None if (record[3] is None) else datetime.datetime.strptime(record[3], '%Y-%m-%d %H:%M:%S.%f')
         self.companyId = record[4]
         self.boxId = record[5]
         self.photoFileName = record[6]

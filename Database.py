@@ -133,25 +133,32 @@ class Database(AbstractDatabase):
         self.execute("SELECT * FROM notifications")
         return self.fetchall()
 
-    def selectAllRecords(self,fromDate, toDate ):
-        self.execute("SELECT * FROM records WHERE departureTime is NOT ? AND "
-                     + "arrivalTime >= ? AND departureTime <= ?", (None,fromDate,toDate))
+    def selectAllRecords(self, fromDate, toDate):
+        self.execute("SELECT * FROM records WHERE departureTime is NOT NULL AND "
+                     + "(arrivalTime >= ? OR departureTime <= ?)", (fromDate,toDate))
+        return self.fetchall()
+
+    def selectAllRecordsWithStatus(self, fromDate, toDate, status):
+        self.execute('''SELECT *
+                        FROM records
+                        WHERE departureTime is NOT NULL
+                          AND status == ?
+                          AND (arrivalTime >= ? OR departureTime <= ?)''', (status, fromDate, toDate))
         return self.fetchall()
 
     def selectAllCompanies(self):
         self.execute("SELECT * FROM companies")
         return self.fetchall()
     
-    def getCompanyNameById(self,id):
-        self.execute("SELECT name FROM companies where companyID=?",[id])
+    def getCompanyNameById(self, id):
+        self.execute("SELECT name FROM companies where companyID = ?",(id, ))
         company = self.fetchone()
         if company is None:
             return None
         return company[0]
     
-    def getCompanyIdByName(self,id):
-        print(id)
-        self.execute("SELECT companyID FROM companies where name=?",[id])
+    def getCompanyIdByName(self, name):
+        self.execute("SELECT companyID FROM companies where name = ?",(name, ))
         return self.fetchone()[0]
 
     # Pri novom pusteni appky
@@ -159,6 +166,7 @@ class Database(AbstractDatabase):
     def getAllRunningRecords(self):
         self.execute("SELECT * FROM records WHERE departureTime IS NULL")
         return self.fetchall()
+        
 
 
 
