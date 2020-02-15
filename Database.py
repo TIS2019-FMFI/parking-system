@@ -159,7 +159,10 @@ class Database(AbstractDatabase):
     
     def getCompanyIdByName(self, name):
         self.execute("SELECT companyID FROM companies where name = ?",(name, ))
-        return self.fetchone()[0]
+        company = self.fetchone()
+        if company is None:
+            return None
+        return company[0]
 
     # Pri novom pusteni appky
     # Vrati vsetky zaznamy, ktore este neboli ukoncene

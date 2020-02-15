@@ -15,14 +15,14 @@ class Record:
         self.departureTime = None
         
         self.photoFileName = photoFileName
-
+        self.photo = None
+        
         self.setStatus(boxCompanyId)
 
     def addPhoto(self):
         name = File.choosePhoto()
-        self.photoFileName = name
-        
-
+        self.photoFileName = name[1]
+        self.photo = name[0]
 
     # Urcute status pre zaznam
     # 3 stavy - 'good', 'borrowed', 'wrong'
