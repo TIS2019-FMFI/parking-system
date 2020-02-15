@@ -20,8 +20,8 @@ class Record:
         
         self.setStatus(boxCompanyId)
 
-    def addPhoto(self):
-        name = File.choosePhoto()
+    def addPhoto(self, ecv):
+        name = File().choosePhoto(ecv)
         self.photoFileName = name[1]        
         self.photo = name[0]
         Database("kvant.db").updateRecord(self)
