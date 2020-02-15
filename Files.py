@@ -4,6 +4,7 @@ import ctypes.wintypes
 from shutil import copyfile
 import datetime
 
+
 CSIDL_PERSONAL= 5       # My Documents
 SHGFP_TYPE_CURRENT= 0
 
@@ -27,4 +28,5 @@ class File:
     
 def getTime():
     return datetime.datetime.now()
+
     

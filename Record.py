@@ -26,6 +26,7 @@ class Record:
         self.photo = name[0]
         Database("kvant.db").updateRecord(self)
 
+
     # Urcute status pre zaznam
     # 3 stavy - 'good', 'borrowed', 'wrong'
     def setStatus(self, boxCompanyId):
