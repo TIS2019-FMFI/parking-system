@@ -61,8 +61,8 @@ class Box:
                            highlightbackground = self.getColor())
         # print("Farba boxu {0} zmenena".format(self.boxLabel))
 
-    def addPhoto(self):
-        self.record.addPhoto()
+    def addPhoto(self, ecv):
+        self.record.addPhoto(ecv)
         
 
     #vytvor instanciu záznamu a vrat ju

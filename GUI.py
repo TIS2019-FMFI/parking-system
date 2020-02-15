@@ -414,15 +414,16 @@ class BoxWindow:
         firma.grid(row = 3, column = 0, columnspan = 2)
 
         # Typ parkovania
-        typParkovania = ttk.Label(self.canvas, text = "{0}".format(box.record.getTypeOfParking()))
+        typParkovania = ttk.Label(self.canvas, text = "Status: {0}".format(box.record.getTypeOfParking()))
         typParkovania.grid(row = 4, column = 0, columnspan = 2)
 
+        # Fotka parkovania
         if box.record.photo is not None:            
             myvar = tk.Button(self.canvas, image = box.record.photo)
             myvar.image = box.record.photo
             myvar.grid(row = 7, column = 0, columnspan = 2, pady = 20)
          
-        buttonNahratFotku = tk.Button(self.canvas, text = 'Nahrať fotku', command= lambda: box.addPhoto())
+        buttonNahratFotku = tk.Button(self.canvas, text = 'Nahrať fotku', command= lambda: box.addPhoto(box.record.ECV))
         buttonNahratFotku.grid(row = 5, column = 0, columnspan = 2, pady = 20)
 
         buttonUkoncitParkovanie = tk.Button(self.canvas, text = 'Ukončiť parkovanie', command = lambda: [box.endParking(),self.win.destroy()])
