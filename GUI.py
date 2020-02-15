@@ -10,7 +10,6 @@ from Logger import Logger
 from Record import Record
 from tkinter import messagebox
 
-
 boxes = []
            
 class FrameCarPark:

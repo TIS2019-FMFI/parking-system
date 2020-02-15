@@ -2,6 +2,8 @@ from tkinter.filedialog import *
 from PIL import Image, ImageTk
 import ctypes.wintypes
 from shutil import copyfile
+import datetime
+
 
 CSIDL_PERSONAL= 5       # My Documents
 SHGFP_TYPE_CURRENT= 0
@@ -16,11 +18,15 @@ class File:
         buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
         ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
 
-        print(path.name)
-        print(buf.value)
+        name = str(datetime.datetime.now())[:-7]
+        name = name.replace('-', '.')
+        name = name.replace(':', '.')
+        newPath = buf.value + '\\Parkovanie\\photos\\' + name + '.jpg'
+        copyfile(path.name, newPath)
 
-        #Permision denied vyskoci tu
-        #copyfile(path.name, buf.value)
+        return (tkimage, newPath)
+    
+def getTime():
+    return datetime.datetime.now()
 
-        return (tkimage, path.name)
     

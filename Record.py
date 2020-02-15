@@ -1,6 +1,7 @@
 from Files import File
 from Database import Database
 import datetime
+from PIL import Image, ImageTk
 
 class Record:
     def __init__(self, ECV, borrowed, companyId, boxId, boxCompanyId, photoFileName = None):
@@ -21,8 +22,10 @@ class Record:
 
     def addPhoto(self):
         name = File.choosePhoto()
-        self.photoFileName = name[1]
+        self.photoFileName = name[1]        
         self.photo = name[0]
+        Database("kvant.db").updateRecord(self)
+
 
     # Urcute status pre zaznam
     # 3 stavy - 'good', 'borrowed', 'wrong'
@@ -52,6 +55,7 @@ class Record:
 
     # Uklada Zaznam do databazy
     def save(self):
+        print('tu')
         recordId = Database("kvant.db").createRecord(self)
         self.recordId = recordId
 
@@ -83,7 +87,12 @@ class Record:
         self.companyId = record[4]
         self.boxId = record[5]
         self.photoFileName = record[6]
+        if self.photoFileName is not None:
+            im = Image.open(self.photoFileName)
+            im = im.resize((150, 100), Image.ANTIALIAS)
+            self.photo = ImageTk.PhotoImage(im)
+        
         self.status = record[7]
-
+        
         self.borrowed = 1 if (record[7] == "borrowed") else 0
 
