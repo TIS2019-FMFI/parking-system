@@ -38,6 +38,10 @@ class File:
             copyfile(path.name, newPath)
 
         return (tkimage, newPath)
+
+    def deletePhoto(self, name):
+        if pathlib.Path(name).exists():
+            pathlib.Path(name).unlink()
     
     def getTimeInString(self):
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S").replace(':', '.')

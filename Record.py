@@ -22,6 +22,9 @@ class Record:
 
     def addPhoto(self, ecv):
         name = File().choosePhoto(ecv)
+        if self.photo is not None:
+            print(self.photoFileName)
+            i = File().deletePhoto(self.photoFileName)
         self.photoFileName = name[1]        
         self.photo = name[0]
         Database("kvant.db").updateRecord(self)

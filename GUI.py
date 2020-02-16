@@ -423,7 +423,7 @@ class BoxWindow:
             myvar.image = box.record.photo
             myvar.grid(row = 7, column = 0, columnspan = 2, pady = 20)
          
-        buttonNahratFotku = tk.Button(self.canvas, text = 'Nahrať fotku', command= lambda: box.addPhoto(box.record.ECV))
+        buttonNahratFotku = tk.Button(self.canvas, text = 'Nahrať fotku', command= lambda: [box.addPhoto(box.record.ECV), self.win.destroy()])
         buttonNahratFotku.grid(row = 5, column = 0, columnspan = 2, pady = 20)
 
         buttonUkoncitParkovanie = tk.Button(self.canvas, text = 'Ukončiť parkovanie', command = lambda: [box.endParking(),self.win.destroy()])
