@@ -56,6 +56,7 @@ class FrameCarPark:
 
             # Vytvorenie tlacidla pre box
             companyName = Database("kvant.db").getCompanyNameById(line["companyId"])
+            print(line["companyId"], companyName)
             if companyName is None:
                 companyName = 'KVANT'
                 box.companyId = Database("kvant.db").getCompanyIdByName('KVANT')
@@ -205,6 +206,11 @@ class FrameStatistics:
 
         toMinute.pack(side = 'left')
         toMinute.pack_propagate(0)
+        
+
+        def zaskrtni(var, polia):
+            for p in polia:
+                p.set(var.get())
 
         
         ecvSucetCasu = tk.IntVar()
@@ -213,14 +219,12 @@ class FrameStatistics:
         ecvPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr1, text='počet záznamov', var = ecvPocetZaznamov)
         ecv = [ecvSucetCasu, ecvPocetZaznamov]
 
-        def checkEcv():
-            for i in ecv:
-                i.set(1)
-
-        ecvPorusujuceParkovani = ttk.Checkbutton(fr1, text='EČV porušujúce parkovanie', command = checkEcv)
+        ecvPorusujuceParkovaniVAR = tk.IntVar()
+        ecvPorusujuceParkovani = ttk.Checkbutton(fr1, text='EČV porušujúce parkovanie', command = lambda: [zaskrtni(ecvPorusujuceParkovaniVAR, ecv)], var = ecvPorusujuceParkovaniVAR)
         ecvPorusujuceParkovani.pack(anchor='w')
         ecvPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
         ecvPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
+
 
         fr2 = tk.Frame(self.canvas)
         fr2.pack(pady=10)
@@ -230,62 +234,49 @@ class FrameStatistics:
         firmyPorusujuceParkovaniPocetZaznamov = ttk.Checkbutton(fr2, text='počet záznamov', var = firmyPocetZaznomov)
         firmy = [firmySucetCasu, firmyPocetZaznomov]
 
-        def checkFirmy():
-            for i in firmy:
-                i.set(1)
-
-        firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = checkFirmy)
+        firmyPorusujuceParkovaniVAR = tk.IntVar()
+        firmyPorusujuceParkovani = ttk.Checkbutton(fr2, text='Firmy porušujúce parkovanie', command = lambda: [zaskrtni(firmyPorusujuceParkovaniVAR, firmy)], var = firmyPorusujuceParkovaniVAR)
         firmyPorusujuceParkovani.pack(anchor='w')
         firmyPorusujuceParkovaniSucetCasu.pack(padx=20, anchor='w')
         firmyPorusujuceParkovaniPocetZaznamov.pack(padx=20, anchor='w')
 
+
         fr3 = tk.Frame(self.canvas)
         fr3.pack(pady=10)
-
         obsadenostKazdyBox = tk.IntVar()
         obsadenostBoxovKazdyBox = ttk.Checkbutton(fr3, text = 'každý box', var = obsadenostKazdyBox)
-
         obsadenostBoxCas = tk.IntVar()
         obsadenostBoxovKazdyBoxVCase = ttk.Checkbutton(fr3, text = 'každý box v čase ', var = obsadenostBoxCas)
-
         obsadenost = [obsadenostBoxCas, obsadenostKazdyBox]
 
-        def checkObsadenost():
-            for i in obsadenost:
-                i.set(1)
-
-        obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command= checkObsadenost)
+        obsadenostBoxovVAR = tk.IntVar()
+        obsadenostBoxov = ttk.Checkbutton(fr3, text = 'Obsadenosť boxov', command = lambda: [zaskrtni(obsadenostBoxovVAR, obsadenost)], var = obsadenostBoxovVAR)
         obsadenostBoxov.pack(anchor='w')
         obsadenostBoxovKazdyBox.pack(padx=20, anchor='w')
-        obsadenostBoxovKazdyBoxVCase.pack(side = 'left')
+        #obsadenostBoxovKazdyBoxVCase.pack(padx=20, anchor='w')
 
         fr4 = tk.Frame(self.canvas)
         fr4.pack(pady=10)
-
         ZTPKazdyBox = tk.IntVar()
         vyuzivaniemiestaPreZtpKazdyBox = ttk.Checkbutton(fr4, text = 'každý box', var = ZTPKazdyBox)
-
         ZTPFirmy = tk.IntVar()
         vyuzivaniemiestaPreZtpPodlaFiriem = ttk.Checkbutton(fr4, text = 'podľa firiem', var = ZTPFirmy)
-
         ztp = [ZTPKazdyBox, ZTPFirmy]
 
-        def checkZTP():
-            for i in ztp:
-                i.set(1)
-
-        vyuzivaniemiestaPreZtp = ttk.Checkbutton(fr4, text = 'Využívanie miesta pre ZŤP', command = checkZTP)
+        vyuzivaniemiestaPreZtpVAR = tk.IntVar()
+        vyuzivaniemiestaPreZtp = ttk.Checkbutton(fr4, text = 'Využívanie miesta pre ZŤP', command = lambda: [zaskrtni(vyuzivaniemiestaPreZtpVAR, ztp)], var = vyuzivaniemiestaPreZtpVAR)
         vyuzivaniemiestaPreZtp.pack(anchor='w')
         vyuzivaniemiestaPreZtpKazdyBox.pack(padx=20, anchor='w')
         vyuzivaniemiestaPreZtpPodlaFiriem.pack(padx=20, anchor='w')
 
         buttonGenerate = ttk.Button(self.canvas, text='Vygeneruj',
-                                    command = lambda: Statistics(ecvSucetCasu, ecvPocetZaznamov,
+                                    command = lambda: [Statistics(ecvSucetCasu, ecvPocetZaznamov,
                                                                  firmySucetCasu, firmyPocetZaznomov,
                                                                  obsadenostBoxCas, obsadenostKazdyBox,
                                                                  ZTPKazdyBox, ZTPFirmy, boxes,
                                                                  datetime.datetime(int(fromYear.get()), int(fromMonth.get()), int(fromDay.get()), int(fromHour.get()), int(fromMinute.get())),
-                                                                 datetime.datetime(int(toYear.get()), int(toMonth.get()), int(toDay.get()), int(toHour.get()), int(toMinute.get()))))
+                                                                 datetime.datetime(int(toYear.get()), int(toMonth.get()), int(toDay.get()), int(toHour.get()), int(toMinute.get()))),
+                                                       messagebox.showinfo("Štatistika","Štatistika úspešne vygenerovaná!\nNájdete ju v zložke \"MyDocuments/Parkovanie/exports\".")])
         buttonGenerate.pack()
         
 class FrameLessees:
@@ -408,7 +399,7 @@ class BoxWindow:
 
         # Firma, ktorej auto parkuje
         print('box.record.companyId',type(box.record.companyId))
-        companyName = Database("kvant.db").getCompanyNameById(int(box.record.companyId)+1)
+        companyName = Database("kvant.db").getCompanyNameById(int(box.record.companyId))
             
         firma = ttk.Label(self.canvas, text= "Firma auta: {0}".format(companyName))
         firma.grid(row = 3, column = 0, columnspan = 2)

@@ -135,7 +135,7 @@ class Database(AbstractDatabase):
 
     def selectAllRecords(self, fromDate, toDate):
         self.execute("SELECT * FROM records WHERE departureTime is NOT NULL AND "
-                     + "(arrivalTime >= ? OR departureTime <= ?)", (fromDate,toDate))
+                     + "(arrivalTime >= ? AND departureTime <= ?)", (fromDate,toDate))
         return self.fetchall()
 
     def selectAllRecordsWithStatus(self, fromDate, toDate, status):
@@ -143,7 +143,7 @@ class Database(AbstractDatabase):
                         FROM records
                         WHERE departureTime is NOT NULL
                           AND status == ?
-                          AND (arrivalTime >= ? OR departureTime <= ?)''', (status, fromDate, toDate))
+                          AND (arrivalTime >= ? AND departureTime <= ?)''', (status, fromDate, toDate))
         return self.fetchall()
 
     def selectAllCompanies(self):
