@@ -16,7 +16,6 @@ class File:
     def choosePhoto(self, ecv):
         path = askopenfile(filetypes=[("Image File",'.jpg')])
         im = Image.open(path.name)
-        print(im.size)
         im = im.resize(self.getNewSize(im), Image.ANTIALIAS)
         tkimage = ImageTk.PhotoImage(im)
         
@@ -24,8 +23,6 @@ class File:
         ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_PERSONAL, 0, SHGFP_TYPE_CURRENT, buf)
 
         time = self.getTimeInString()
-        #time = time.replace('-', '.').replace(':', '.')
-        #time = time.replace(':', '.')
         name = "{0} {1}".format(time, ecv)
         newPath = buf.value + '\\Parkovanie\\photos\\' + name + '.jpg'
 
@@ -49,8 +46,14 @@ class File:
     def getNewSize(self, image):
         width, height = image.size
 
-        # Cheme, aby vyska obrazka bola vzdy okolo 100px
-        factor = height // 100
+        # Cheme, aby jeden z rozmerov obrazka bol vzdy okolo 150px
+        factor = 1
+        if(width > height):
+            factor = height // 150
+        else:
+            factor = width // 150
+        if(factor == 0): factor = 1
+        
         new_width = round(width / factor)
         new_height = round(height / factor)
 
